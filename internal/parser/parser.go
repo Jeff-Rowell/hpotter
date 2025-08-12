@@ -20,7 +20,7 @@ type dbConfig struct {
 	User     string `json:"user"`
 	Password string `json:"password"`
 	Host     string `json:"host"`
-	Port     int16  `json:"port"`
+	Port     string `json:"port"`
 }
 
 func NewParser() Parser {
