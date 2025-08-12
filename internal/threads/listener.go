@@ -1,4 +1,4 @@
-package listener
+package threads
 
 import (
 	"fmt"
@@ -10,7 +10,7 @@ import (
 	"github.com/Jeff-Rowell/hpotter/types"
 )
 
-func Listen(service types.Service, wg *sync.WaitGroup) {
+func StartListener(service types.Service, wg *sync.WaitGroup) {
 	defer wg.Done()
 	lowerProto := strings.ToLower(service.ListenProto)
 	log.Printf("starting listener on %s port %d", lowerProto, service.ListenPort)
@@ -22,9 +22,11 @@ func Listen(service types.Service, wg *sync.WaitGroup) {
 
 	for {
 		conn, err := listenSocket.Accept()
+		fmt.Printf("service: %+v", service)
 		if err != nil {
 			log.Fatalf("error: failed to accept connection: %v", err)
 		}
 		log.Printf("connection received: (src=%s, dst=%s, proto=%s)", conn.RemoteAddr(), conn.LocalAddr(), conn.LocalAddr().Network())
+		LaunchContainer(service)
 	}
 }

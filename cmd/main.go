@@ -5,8 +5,8 @@ import (
 	"log"
 	"sync"
 
-	"github.com/Jeff-Rowell/hpotter/internal/listener"
 	"github.com/Jeff-Rowell/hpotter/internal/parser"
+	"github.com/Jeff-Rowell/hpotter/internal/threads"
 )
 
 type flags struct {
@@ -20,9 +20,9 @@ func main() {
 
 	var wg sync.WaitGroup
 	log.Printf("starting %d socket listeners", len(config.Services))
-	for _, containerConf := range config.Services {
+	for _, serviceCfg := range config.Services {
 		wg.Add(1)
-		go listener.Listen(containerConf, &wg)
+		go threads.StartListener(serviceCfg, &wg)
 	}
 	wg.Wait()
 }
