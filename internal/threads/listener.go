@@ -18,10 +18,16 @@ func StartListener(service types.Service, wg *sync.WaitGroup) {
 	var err error
 	var listenSocket net.Listener
 	if service.ListenAddress == "" {
-		listenSocket, err = net.Listen(lowerProto, fmt.Sprintf("0.0.0.0:%d", service.ListenPort))
-	} else {
-		listenSocket, err = net.Listen(lowerProto, fmt.Sprintf("%s:%d", service.ListenAddress, service.ListenPort))
+		service.ListenAddress = "0.0.0.0"
 	}
+
+	listenSocket, err = net.Listen(lowerProto, fmt.Sprintf("%s:%d", service.ListenAddress, service.ListenPort))
+	if err != nil {
+		log.Fatalf("error creating listener on %s %d/%s", service.ListenAddress, service.ListenPort, service.ListenProto)
+	}
+	defer listenSocket.Close()
+	log.Printf("created socket listener on %s", service.ListenAddress)
+
 	if err != nil {
 		log.Fatalf("error: failed to create listener: %v", err)
 	}
@@ -32,8 +38,9 @@ func StartListener(service types.Service, wg *sync.WaitGroup) {
 			log.Fatalf("error: failed to accept connection: %v", err)
 		}
 		log.Printf("connection received: (src=%s, dst=%s, proto=%s)", conn.RemoteAddr(), conn.LocalAddr(), conn.LocalAddr().Network())
-		containerThread := NewContainerThread(service)
+		containerThread := NewContainerThread(service, conn)
 		containerThread.LaunchContainer()
 		containerThread.Connect()
+		containerThread.Communicate(wg)
 	}
 }

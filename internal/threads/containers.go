@@ -2,11 +2,14 @@ package threads
 
 import (
 	"context"
+	"fmt"
 	"log"
 	"net"
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
+	"time"
 
 	"github.com/Jeff-Rowell/hpotter/types"
 	"github.com/docker/go-connections/nat"
@@ -15,18 +18,17 @@ import (
 )
 
 type Container struct {
-	Container      container.CreateResponse
+	CreateResponse container.CreateResponse
 	ContainerIP    string
 	ContainerProto string
+	Source         net.Conn
 	Destination    net.Conn
 	Svc            types.Service
 	Ctx            context.Context
 	DockerClient   *client.Client
-	RequestThread  struct{} // TODO
-	ResponseThread struct{} // TODO
 }
 
-func NewContainerThread(service types.Service) Container {
+func NewContainerThread(service types.Service, source net.Conn) Container {
 	ctx := context.Background()
 	dockerClient, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
@@ -36,6 +38,7 @@ func NewContainerThread(service types.Service) Container {
 		Ctx:          ctx,
 		DockerClient: dockerClient,
 		Svc:          service,
+		Source:       source,
 	}
 }
 
@@ -74,32 +77,58 @@ func (c *Container) LaunchContainer() {
 	}
 
 	log.Printf("create container response: %+v", createdContainer)
-	c.Container = createdContainer
+	c.CreateResponse = createdContainer
 
-	err = c.DockerClient.ContainerStart(c.Ctx, c.Container.ID, container.StartOptions{})
+	err = c.DockerClient.ContainerStart(c.Ctx, c.CreateResponse.ID, container.StartOptions{})
 	if err != nil {
-		log.Fatalf("error: failed to start container %s running image %s: %v", c.Container.ID, c.Svc.ImageName, err)
+		log.Fatalf("error: failed to start container %s running image %s: %v", c.CreateResponse.ID, c.Svc.ImageName, err)
 	}
 }
 
 func (c *Container) Connect() {
-	inspectResponse, err := c.DockerClient.ContainerInspect(c.Ctx, c.Container.ID)
+	log.Printf("connecting to container %s running image %s", c.CreateResponse.ID, c.Svc.ImageName)
+	inspectResponse, err := c.DockerClient.ContainerInspect(c.Ctx, c.CreateResponse.ID)
 	if err != nil {
-		log.Fatalf("error inspecting container %s running image %s", c.Container.ID, c.Svc.ImageName)
+		log.Fatalf("error inspecting container %s running image %s", c.CreateResponse.ID, c.Svc.ImageName)
 	}
 	c.ContainerIP = inspectResponse.NetworkSettings.Networks["bridge"].IPAddress
 
+	errSlice := make([]string, 10)
 	if strings.EqualFold(c.Svc.ListenProto, "tcp") {
-		dest, err := net.DialTCP("tcp", nil, &net.TCPAddr{IP: net.ParseIP(c.ContainerIP), Port: c.Svc.ListenPort})
-		if err != nil {
-			log.Fatalf("network error: %v", err)
+		for range 10 {
+			dest, err := net.DialTCP("tcp", nil, &net.TCPAddr{IP: net.ParseIP(c.ContainerIP), Port: c.Svc.ListenPort})
+			if err != nil {
+				errSlice = append(errSlice, fmt.Sprintf("network error: %v\n", err))
+				time.Sleep(2 * time.Second)
+			} else {
+				c.Destination = dest
+				break
+			}
 		}
-		c.Destination = dest
 	} else {
-		dest, err := net.DialUDP("udp", nil, &net.UDPAddr{IP: net.ParseIP(c.ContainerIP), Port: c.Svc.ListenPort})
-		if err != nil {
-			log.Fatalf("network error: %v", err)
+		for range 10 {
+			dest, err := net.DialUDP("udp", nil, &net.UDPAddr{IP: net.ParseIP(c.ContainerIP), Port: c.Svc.ListenPort})
+			if err != nil {
+				errSlice = append(errSlice, fmt.Sprintf("network error: %v\n", err))
+				time.Sleep(2 * time.Second)
+			} else {
+				c.Destination = dest
+				break
+			}
 		}
-		c.Destination = dest
 	}
+	if len(errSlice) == 10 {
+		log.Fatalf("error attempting connection 10 times: %v\n", errSlice)
+	}
+	log.Printf("successfully connected to container %s running image %s on %s", c.CreateResponse.ID, c.Svc.ImageName, c.ContainerIP)
+}
+
+func (c *Container) Communicate(wg *sync.WaitGroup) {
+	wg.Add(1)
+	requestThread := NewOneWayThread("request", c)
+	go requestThread.StartOneWayThread(wg)
+
+	wg.Add(1)
+	responseThread := NewOneWayThread("response", c)
+	go responseThread.StartOneWayThread(wg)
 }
