@@ -13,6 +13,7 @@ import (
 	"github.com/Jeff-Rowell/hpotter/types"
 	"github.com/docker/go-connections/nat"
 	"github.com/moby/moby/api/types/container"
+	"github.com/moby/moby/api/types/filters"
 	"github.com/moby/moby/client"
 )
 
@@ -134,8 +135,17 @@ func (c *Container) Communicate(wg *sync.WaitGroup) {
 	go responseThread.StartOneWayThread(wg)
 }
 
+func (c *Container) GetOurContainers() []container.Summary {
+	filters := filters.NewArgs()
+	filters.Add("label", "hpotter=container")
+	containers, err := c.DockerClient.ContainerList(context.Background(), container.ListOptions{Filters: filters})
+	if err != nil {
+		log.Fatalf("error listing containers by hpotter=container label: %v", err)
+	}
+	return containers
+}
+
 func (c *Container) RemoveContainer(containerID, imageName string) {
-	log.Printf("removing container %s running image %s", containerID, imageName)
 	removeOps := container.RemoveOptions{
 		Force: true,
 	}
@@ -143,5 +153,11 @@ func (c *Container) RemoveContainer(containerID, imageName string) {
 		log.Printf("error removing container %s running image %s: %v", containerID, imageName, err)
 		return
 	}
-	log.Printf("successfully removed container %s running image %s", containerID, imageName)
+}
+
+func (c *Container) RemoveAllContainers() {
+	ourContainers := c.GetOurContainers()
+	for _, container := range ourContainers {
+		c.RemoveContainer(container.ID, container.Image)
+	}
 }

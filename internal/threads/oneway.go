@@ -48,7 +48,6 @@ func (oneway *OneWayThread) StartOneWayThread(wg *sync.WaitGroup) {
 			if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
 				continue
 			}
-			log.Printf("connection closed for %s thread from container %s: %v", oneway.Direction, oneway.Container.CreateResponse.ID, err)
 			return
 		}
 		if numBytesRead == 0 {

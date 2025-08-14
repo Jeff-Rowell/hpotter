@@ -54,7 +54,9 @@ func StartListener(service types.Service, wg *sync.WaitGroup, ctx context.Contex
 			return
 		case conn := <-connChan:
 			log.Printf("connection received: (src=%s, dst=%s, proto=%s)", conn.RemoteAddr(), conn.LocalAddr(), conn.LocalAddr().Network())
-			go handleConnection(service, conn, ctx, wg)
+			containerThread := NewContainerThread(service, conn, ctx)
+			go handleConnection(containerThread, ctx, wg)
+			defer containerThread.RemoveAllContainers()
 		case err := <-errChan:
 			log.Printf("error: failed to accept connection: %v", err)
 			return
@@ -62,13 +64,9 @@ func StartListener(service types.Service, wg *sync.WaitGroup, ctx context.Contex
 	}
 }
 
-func handleConnection(service types.Service, source net.Conn, ctx context.Context, wg *sync.WaitGroup) {
-	containerThread := NewContainerThread(service, source, ctx)
+func handleConnection(containerThread Container, ctx context.Context, wg *sync.WaitGroup) {
 	containerThread.LaunchContainer()
 	containerThread.Connect()
 	containerThread.Communicate(wg)
 	<-ctx.Done()
-	log.Printf("listener: container goroutine received cancellation signal")
-	log.Printf("listener: cleaning up container %s", containerThread.CreateResponse.ID)
-	containerThread.RemoveContainer(containerThread.CreateResponse.ID, containerThread.Svc.ImageName)
 }
