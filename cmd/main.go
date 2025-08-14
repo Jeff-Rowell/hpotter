@@ -1,9 +1,13 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"log"
+	"os"
+	"os/signal"
 	"sync"
+	"syscall"
 
 	"github.com/Jeff-Rowell/hpotter/internal/parser"
 	"github.com/Jeff-Rowell/hpotter/internal/threads"
@@ -14,6 +18,18 @@ type flags struct {
 }
 
 func main() {
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		<-sigChan
+		log.Printf("main: received cancellation signal")
+		cancel()
+	}()
+
 	flags := parseFlags()
 	config := parser.NewParser()
 	config.Parse(flags.configJson)
@@ -22,7 +38,7 @@ func main() {
 	log.Printf("starting %d socket listeners", len(config.Services))
 	for _, serviceCfg := range config.Services {
 		wg.Add(1)
-		go threads.StartListener(serviceCfg, &wg)
+		go threads.StartListener(serviceCfg, &wg, ctx)
 	}
 	wg.Wait()
 }

@@ -7,7 +7,6 @@ import (
 	"net"
 	"path/filepath"
 	"strconv"
-	"strings"
 	"sync"
 	"time"
 
@@ -26,19 +25,23 @@ type Container struct {
 	Svc            types.Service
 	Ctx            context.Context
 	DockerClient   *client.Client
+	Labels         map[string]string
 }
 
-func NewContainerThread(service types.Service, source net.Conn) Container {
-	ctx := context.Background()
+func NewContainerThread(service types.Service, source net.Conn, ctx context.Context) Container {
 	dockerClient, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
 		log.Fatalf("error creating docker client: %v", err)
+	}
+	labels := map[string]string{
+		"hpotter": "container",
 	}
 	return Container{
 		Ctx:          ctx,
 		DockerClient: dockerClient,
 		Svc:          service,
 		Source:       source,
+		Labels:       labels,
 	}
 }
 
@@ -64,7 +67,8 @@ func (c *Container) LaunchContainer() {
 	createdContainer, err := c.DockerClient.ContainerCreate(
 		c.Ctx,
 		&container.Config{
-			Image: c.Svc.ImageName,
+			Image:  c.Svc.ImageName,
+			Labels: c.Labels,
 		},
 		&container.HostConfig{
 			PortBindings: portSet,
@@ -93,28 +97,25 @@ func (c *Container) Connect() {
 	}
 	c.ContainerIP = inspectResponse.NetworkSettings.Networks["bridge"].IPAddress
 
-	errSlice := make([]string, 10)
-	if strings.EqualFold(c.Svc.ListenProto, "tcp") {
-		for range 10 {
-			dest, err := net.DialTCP("tcp", nil, &net.TCPAddr{IP: net.ParseIP(c.ContainerIP), Port: c.Svc.ListenPort})
-			if err != nil {
-				errSlice = append(errSlice, fmt.Sprintf("network error: %v\n", err))
-				time.Sleep(2 * time.Second)
-			} else {
-				c.Destination = dest
-				break
-			}
+	var errSlice []string
+	for range 10 {
+		select {
+		case <-c.Ctx.Done():
+			return
+		default:
 		}
-	} else {
-		for range 10 {
-			dest, err := net.DialUDP("udp", nil, &net.UDPAddr{IP: net.ParseIP(c.ContainerIP), Port: c.Svc.ListenPort})
-			if err != nil {
-				errSlice = append(errSlice, fmt.Sprintf("network error: %v\n", err))
-				time.Sleep(2 * time.Second)
-			} else {
-				c.Destination = dest
-				break
+
+		dest, err := net.DialTimeout(c.Svc.ListenProto, fmt.Sprintf("%s:%d", c.ContainerIP, c.Svc.ListenPort), 5*time.Second)
+		if err != nil {
+			errSlice = append(errSlice, fmt.Sprintf("network error: %v\n", err))
+			select {
+			case <-c.Ctx.Done():
+				return
+			case <-time.After(2 * time.Second):
 			}
+		} else {
+			c.Destination = dest
+			break
 		}
 	}
 	if len(errSlice) == 10 {
@@ -131,4 +132,16 @@ func (c *Container) Communicate(wg *sync.WaitGroup) {
 	wg.Add(1)
 	responseThread := NewOneWayThread("response", c)
 	go responseThread.StartOneWayThread(wg)
+}
+
+func (c *Container) RemoveContainer(containerID, imageName string) {
+	log.Printf("removing container %s running image %s", containerID, imageName)
+	removeOps := container.RemoveOptions{
+		Force: true,
+	}
+	if err := c.DockerClient.ContainerRemove(context.Background(), containerID, removeOps); err != nil {
+		log.Printf("error removing container %s running image %s: %v", containerID, imageName, err)
+		return
+	}
+	log.Printf("successfully removed container %s running image %s", containerID, imageName)
 }

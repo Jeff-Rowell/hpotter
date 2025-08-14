@@ -4,6 +4,7 @@ import (
 	"log"
 	"net"
 	"sync"
+	"time"
 )
 
 type OneWayThread struct {
@@ -34,9 +35,19 @@ func NewOneWayThread(direction string, container *Container) OneWayThread {
 func (oneway *OneWayThread) StartOneWayThread(wg *sync.WaitGroup) {
 	defer wg.Done()
 	for {
+		select {
+		case <-oneway.Container.Ctx.Done():
+			return
+		default:
+		}
+		oneway.Source.SetReadDeadline(time.Now().Add(100 * time.Millisecond))
+
 		bytes := make([]byte, 4096)
 		numBytesRead, err := oneway.Source.Read(bytes)
 		if err != nil {
+			if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
+				continue
+			}
 			log.Printf("connection closed for %s thread from container %s: %v", oneway.Direction, oneway.Container.CreateResponse.ID, err)
 			return
 		}
