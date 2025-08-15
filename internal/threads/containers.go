@@ -47,7 +47,7 @@ func NewContainerThread(service types.Service, source net.Conn, ctx context.Cont
 }
 
 func (c *Container) LaunchContainer() {
-	log.Printf("starting container: %s", filepath.Clean(c.Svc.ImageName))
+	log.Printf("creating container: %s", filepath.Clean(c.Svc.ImageName))
 	port, err := nat.NewPort(c.Svc.ListenProto, strconv.Itoa(c.Svc.ListenPort))
 	if err != nil {
 		log.Fatalf("error creating nat port %d/%s: %v", c.Svc.ListenPort, c.Svc.ListenProto, err)
@@ -78,12 +78,13 @@ func (c *Container) LaunchContainer() {
 		nil,
 		"")
 	if err != nil {
-		log.Fatalf("error running image '%s': %v", c.Svc.ImageName, err)
+		log.Fatalf("error creating container using image '%s': %v", c.Svc.ImageName, err)
 	}
 
 	log.Printf("create container response: %+v", createdContainer)
 	c.CreateResponse = createdContainer
 
+	log.Printf("starting container: %s", filepath.Clean(c.Svc.ImageName))
 	err = c.DockerClient.ContainerStart(c.Ctx, c.CreateResponse.ID, container.StartOptions{})
 	if err != nil {
 		log.Fatalf("error: failed to start container %s running image %s: %v", c.CreateResponse.ID, c.Svc.ImageName, err)
