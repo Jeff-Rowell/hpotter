@@ -7,6 +7,13 @@ toolchain go1.23.12
 require github.com/moby/moby/client v0.1.0-alpha.0
 
 require (
+	github.com/jinzhu/inflection v1.0.0 // indirect
+	github.com/jinzhu/now v1.1.5 // indirect
+	golang.org/x/text v0.20.0 // indirect
+	gorm.io/gorm v1.30.1 // indirect
+)
+
+require (
 	github.com/Microsoft/go-winio v0.6.2 // indirect
 	github.com/containerd/errdefs v1.0.0 // indirect
 	github.com/containerd/errdefs/pkg v0.3.0 // indirect
