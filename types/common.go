@@ -10,3 +10,12 @@ type Service struct {
 	SocketTimeout int32  `json:"socket_timeout"`
 	Tls           bool   `json:"tls"`
 }
+
+type DBConfig struct {
+	DBType   string `json:"db_type"`
+	Name     string `json:"name"`
+	User     string `json:"user"`
+	Password string `json:"password"`
+	Host     string `json:"host"`
+	Port     string `json:"port"`
+}

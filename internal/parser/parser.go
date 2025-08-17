@@ -10,17 +10,8 @@ import (
 )
 
 type Parser struct {
-	DBConfig dbConfig        `json:"db_config"`
+	DBConfig types.DBConfig  `json:"db_config"`
 	Services []types.Service `json:"services"`
-}
-
-type dbConfig struct {
-	DBType   string `json:"db_type"`
-	Name     string `json:"name"`
-	User     string `json:"user"`
-	Password string `json:"password"`
-	Host     string `json:"host"`
-	Port     string `json:"port"`
 }
 
 func NewParser() Parser {
