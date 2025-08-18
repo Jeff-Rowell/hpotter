@@ -65,11 +65,18 @@ func (c *Container) LaunchContainer() {
 	}
 	portSet := container.PortMap{port: []nat.PortBinding{portBinding}}
 
+	// Build environment variables slice from service config
+	var envVars []string
+	for _, envVar := range c.Svc.EnvVars {
+		envVars = append(envVars, fmt.Sprintf("%s=%s", envVar.Key, envVar.Value))
+	}
+
 	createdContainer, err := c.DockerClient.ContainerCreate(
 		c.Ctx,
 		&container.Config{
 			Image:  c.Svc.ImageName,
 			Labels: c.Labels,
+			Env:    envVars,
 		},
 		&container.HostConfig{
 			PortBindings: portSet,
