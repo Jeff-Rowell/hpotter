@@ -7,13 +7,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// Protocol constants from the original Python code
-const (
-	TCP = 6
-	UDP = 17
-)
-
-// Connections represents the schema for all connections made to HPotter
 type Connections struct {
 	ID                 uint      `gorm:"primaryKey" json:"id"`
 	CreatedAt          time.Time `gorm:"autoCreateTime" json:"created_at"`
@@ -31,18 +24,13 @@ type Connections struct {
 	Data        []Data        `gorm:"foreignKey:ConnectionsID" json:"data,omitempty"`
 }
 
-// Credentials stores username and passwords where appropriate
 type Credentials struct {
-	ID            uint   `gorm:"primaryKey" json:"id"`
-	Username      string `json:"username"`
-	Password      string `json:"password"`
-	ConnectionsID uint   `json:"connections_id"`
-
-	// Relationship
-	Connection Connections `gorm:"foreignKey:ConnectionsID" json:"connection,omitempty"`
+	ID            uint        `gorm:"primaryKey" json:"id"`
+	Username      string      `json:"username"`
+	Password      string      `json:"password"`
+	ConnectionsID uint        `json:"connections_id"`
+	Connection    Connections `gorm:"foreignKey:ConnectionsID" json:"connection,omitempty"`
 }
-
-// Data represents the requests (and possibly responses) to/from HPotter containers
 type Data struct {
 	ID            uint   `gorm:"primaryKey" json:"id"`
 	Direction     string `json:"direction"`
@@ -53,7 +41,6 @@ type Data struct {
 	Connection Connections `gorm:"foreignKey:ConnectionsID" json:"connection,omitempty"`
 }
 
-// Migrate runs the database migrations for all models
 func Migrate(db *gorm.DB) error {
 	return db.AutoMigrate(&Connections{}, &Credentials{}, &Data{})
 }
