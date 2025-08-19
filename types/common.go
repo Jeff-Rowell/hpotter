@@ -19,9 +19,6 @@ type Service struct {
 
 type DBConfig struct {
 	DBType   string `json:"db_type"`
-	Name     string `json:"name"`
 	User     string `json:"user"`
 	Password string `json:"password"`
-	Host     string `json:"host"`
-	Port     string `json:"port"`
 }

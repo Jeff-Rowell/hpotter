@@ -9,6 +9,7 @@ import (
 	"sync"
 	"syscall"
 
+	"github.com/Jeff-Rowell/hpotter/internal/database"
 	"github.com/Jeff-Rowell/hpotter/internal/parser"
 	"github.com/Jeff-Rowell/hpotter/internal/threads"
 )
@@ -33,6 +34,30 @@ func main() {
 	flags := parseFlags()
 	config := parser.NewParser()
 	config.Parse(flags.configJson)
+
+	dbContainer, err := database.NewDatabaseContainer(config.DBConfig)
+	if err != nil {
+		log.Fatalf("failed to create database container manager: %v", err)
+	}
+
+	if err := dbContainer.Setup(ctx); err != nil {
+		log.Fatalf("failed to setup database: %v", err)
+	}
+
+	defer func() {
+		log.Printf("cleaning up database resources...")
+		if err := dbContainer.Cleanup(ctx); err != nil {
+			log.Printf("failed to cleanup database resources: %v", err)
+		}
+	}()
+
+	db, err := database.NewDatabase(config.DBConfig)
+	if err != nil {
+		log.Fatalf("failed to connect to database: %v", err)
+	}
+	defer db.Close()
+
+	log.Printf("database initialized successfully")
 
 	var wg sync.WaitGroup
 	log.Printf("starting %d socket listeners", len(config.Services))

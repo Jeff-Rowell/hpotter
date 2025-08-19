@@ -67,33 +67,14 @@ func (d *Database) connect() error {
 }
 
 func (d *Database) buildSQLiteConnectionString() string {
-	if d.config.Name == "" {
-		return "hpotter.db"
-	}
-	return d.config.Name
+	return "hpotter.db"
 }
 
 func (d *Database) buildPostgresConnectionString() string {
-	user := d.config.User
-	if user == "" {
-		user = "postgres"
-	}
-
-	host := d.config.Host
-	if host == "" {
-		host = "localhost"
-	}
-
-	port := d.config.Port
-	if port == "" {
-		port = "5432"
-	}
-
-	dbname := d.config.Name
-	if dbname == "" {
-		dbname = "hpotter"
-	}
-
+	user := "postgres"
+	host := "localhost"
+	port := "5432"
+	dbname := "hpotter-database"
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
 		host, user, d.config.Password, dbname, port)
 
