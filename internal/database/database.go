@@ -85,7 +85,7 @@ func (d *Database) migrate() error {
 	return Migrate(d.DB)
 }
 
-func (d *Database) Write(record interface{}) error {
+func (d *Database) Write(record any) error {
 	if d.lockNeeded {
 		d.mu.Lock()
 		defer d.mu.Unlock()
