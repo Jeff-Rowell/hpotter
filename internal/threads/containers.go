@@ -10,6 +10,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/Jeff-Rowell/hpotter/internal/database"
 	"github.com/Jeff-Rowell/hpotter/types"
 	"github.com/docker/go-connections/nat"
 	"github.com/moby/moby/api/types/container"
@@ -133,13 +134,13 @@ func (c *Container) Connect() {
 	log.Printf("successfully connected to container %s running image %s on %s", c.CreateResponse.ID, c.Svc.ImageName, c.ContainerIP)
 }
 
-func (c *Container) Communicate(wg *sync.WaitGroup) {
+func (c *Container) Communicate(wg *sync.WaitGroup, db *database.Database) {
 	wg.Add(1)
-	requestThread := NewOneWayThread("request", c)
+	requestThread := NewOneWayThread("request", c, db)
 	go requestThread.StartOneWayThread(wg)
 
 	wg.Add(1)
-	responseThread := NewOneWayThread("response", c)
+	responseThread := NewOneWayThread("response", c, db)
 	go responseThread.StartOneWayThread(wg)
 }
 

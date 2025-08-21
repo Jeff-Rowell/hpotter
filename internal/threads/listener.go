@@ -8,10 +8,11 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/Jeff-Rowell/hpotter/internal/database"
 	"github.com/Jeff-Rowell/hpotter/types"
 )
 
-func StartListener(service types.Service, wg *sync.WaitGroup, ctx context.Context) {
+func StartListener(service types.Service, wg *sync.WaitGroup, ctx context.Context, db *database.Database) {
 	defer wg.Done()
 	lowerProto := strings.ToLower(service.ListenProto)
 	log.Printf("starting listener on %s port %d", lowerProto, service.ListenPort)
@@ -55,7 +56,7 @@ func StartListener(service types.Service, wg *sync.WaitGroup, ctx context.Contex
 		case conn := <-connChan:
 			log.Printf("connection received: (src=%s, dst=%s, proto=%s)", conn.RemoteAddr(), conn.LocalAddr(), conn.LocalAddr().Network())
 			containerThread := NewContainerThread(service, conn, ctx)
-			go handleConnection(containerThread, ctx, wg)
+			go handleConnection(containerThread, ctx, wg, db)
 			defer containerThread.RemoveAllContainers()
 		case err := <-errChan:
 			log.Printf("error: failed to accept connection: %v", err)
@@ -64,9 +65,9 @@ func StartListener(service types.Service, wg *sync.WaitGroup, ctx context.Contex
 	}
 }
 
-func handleConnection(containerThread Container, ctx context.Context, wg *sync.WaitGroup) {
+func handleConnection(containerThread Container, ctx context.Context, wg *sync.WaitGroup, db *database.Database) {
 	containerThread.LaunchContainer()
 	containerThread.Connect()
-	containerThread.Communicate(wg)
+	containerThread.Communicate(wg, db)
 	<-ctx.Done()
 }

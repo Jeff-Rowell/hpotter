@@ -63,7 +63,7 @@ func main() {
 	log.Printf("starting %d socket listeners", len(config.Services))
 	for _, serviceCfg := range config.Services {
 		wg.Add(1)
-		go threads.StartListener(serviceCfg, &wg, ctx)
+		go threads.StartListener(serviceCfg, &wg, ctx, db)
 	}
 	wg.Wait()
 }

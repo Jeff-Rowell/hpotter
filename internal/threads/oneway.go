@@ -3,37 +3,44 @@ package threads
 import (
 	"log"
 	"net"
+	"strings"
 	"sync"
 	"time"
+
+	"github.com/Jeff-Rowell/hpotter/internal/database"
 )
 
 type OneWayThread struct {
 	Direction   string
 	Source      net.Conn
 	Destination net.Conn
-	Container   Container
+	Container   *Container
+	Database    *database.Database
 }
 
-func NewOneWayThread(direction string, container *Container) OneWayThread {
+func NewOneWayThread(direction string, container *Container, db *database.Database) OneWayThread {
 	if direction == "request" {
 		return OneWayThread{
 			Direction:   direction,
 			Source:      container.Source,
 			Destination: container.Destination,
-			Container:   *container,
+			Container:   container,
+			Database:    db,
 		}
 	} else {
 		return OneWayThread{
 			Direction:   direction,
 			Source:      container.Destination,
 			Destination: container.Source,
-			Container:   *container,
+			Container:   container,
+			Database:    db,
 		}
 	}
 }
 
 func (oneway *OneWayThread) StartOneWayThread(wg *sync.WaitGroup) {
 	defer wg.Done()
+	var totalData []byte
 	for {
 		select {
 		case <-oneway.Container.Ctx.Done():
@@ -58,5 +65,14 @@ func (oneway *OneWayThread) StartOneWayThread(wg *sync.WaitGroup) {
 			log.Printf("error writing bytes in %s thread to container %s: %v", oneway.Direction, oneway.Container.CreateResponse.ID, err)
 			return
 		}
+		totalData = append(totalData, bytes[:numBytesRead]...)
+	}
+	if strings.ToLower(oneway.Direction) == "request" && oneway.Container.Svc.RequestSave {
+		log.Printf("Request data: %s", string(totalData))
+		oneway.Database.Write(string(totalData))
+	}
+	if strings.ToLower(oneway.Direction) == "response" && oneway.Container.Svc.ResponseSave {
+		log.Printf("Response data: %s", string(totalData))
+		oneway.Database.Write(string(totalData))
 	}
 }
