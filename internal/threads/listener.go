@@ -7,6 +7,7 @@ import (
 	"net"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/Jeff-Rowell/hpotter/internal/database"
 	"github.com/Jeff-Rowell/hpotter/types"
@@ -55,8 +56,12 @@ func StartListener(service types.Service, wg *sync.WaitGroup, ctx context.Contex
 			return
 		case conn := <-connChan:
 			log.Printf("connection received: (src=%s, dst=%s, proto=%s)", conn.RemoteAddr(), conn.LocalAddr(), conn.LocalAddr().Network())
+
+			dbConn := buildConnection(service.ImageName, conn)
+			go writeConnection(dbConn, db)
+
 			containerThread := NewContainerThread(service, conn, ctx)
-			go handleConnection(containerThread, ctx, wg, db)
+			go handleConnection(containerThread, ctx, wg, db, dbConn)
 			defer containerThread.RemoveAllContainers()
 		case err := <-errChan:
 			log.Printf("error: failed to accept connection: %v", err)
@@ -65,9 +70,41 @@ func StartListener(service types.Service, wg *sync.WaitGroup, ctx context.Contex
 	}
 }
 
-func handleConnection(containerThread Container, ctx context.Context, wg *sync.WaitGroup, db *database.Database) {
+func handleConnection(containerThread Container, ctx context.Context, wg *sync.WaitGroup, db *database.Database, dbConn *database.Connections) {
 	containerThread.LaunchContainer()
 	containerThread.Connect()
-	containerThread.Communicate(wg, db)
+	containerThread.Communicate(wg, db, dbConn)
 	<-ctx.Done()
+}
+
+func buildConnection(imageName string, conn net.Conn) *database.Connections {
+	var srcPort int
+	var destPort int
+	var proto int
+	switch addr := conn.LocalAddr().(type) {
+	case *net.UDPAddr:
+		srcPort = addr.Port
+		destPort = conn.RemoteAddr().(*net.UDPAddr).Port
+		proto = 6
+	case *net.TCPAddr:
+		srcPort = addr.Port
+		destPort = conn.RemoteAddr().(*net.TCPAddr).Port
+		proto = 17
+	}
+	dbConn := &database.Connections{
+		CreatedAt:          time.Now().UTC(),
+		SourceAddress:      net.IP(conn.LocalAddr().String()),
+		SourcePort:         srcPort,
+		DestinationAddress: net.IP(conn.RemoteAddr().String()),
+		DestinationPort:    destPort,
+		Container:          imageName,
+		Proto:              proto,
+	}
+	return dbConn
+}
+
+func writeConnection(dbConn *database.Connections, db *database.Database) {
+	if err := db.Write(dbConn); err != nil {
+		log.Fatalf("error writing connection to database: %+v: %v", dbConn, err)
+	}
 }

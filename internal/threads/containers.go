@@ -134,13 +134,13 @@ func (c *Container) Connect() {
 	log.Printf("successfully connected to container %s running image %s on %s", c.CreateResponse.ID, c.Svc.ImageName, c.ContainerIP)
 }
 
-func (c *Container) Communicate(wg *sync.WaitGroup, db *database.Database) {
+func (c *Container) Communicate(wg *sync.WaitGroup, db *database.Database, dbConn *database.Connections) {
 	wg.Add(1)
-	requestThread := NewOneWayThread("request", c, db)
+	requestThread := NewOneWayThread("request", c, db, *dbConn)
 	go requestThread.StartOneWayThread(wg)
 
 	wg.Add(1)
-	responseThread := NewOneWayThread("response", c, db)
+	responseThread := NewOneWayThread("response", c, db, *dbConn)
 	go responseThread.StartOneWayThread(wg)
 }
 

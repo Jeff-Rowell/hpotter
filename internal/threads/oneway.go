@@ -16,9 +16,10 @@ type OneWayThread struct {
 	Destination net.Conn
 	Container   *Container
 	Database    *database.Database
+	DBConn      database.Connections
 }
 
-func NewOneWayThread(direction string, container *Container, db *database.Database) OneWayThread {
+func NewOneWayThread(direction string, container *Container, db *database.Database, dbConn database.Connections) OneWayThread {
 	if direction == "request" {
 		return OneWayThread{
 			Direction:   direction,
@@ -26,6 +27,7 @@ func NewOneWayThread(direction string, container *Container, db *database.Databa
 			Destination: container.Destination,
 			Container:   container,
 			Database:    db,
+			DBConn:      dbConn,
 		}
 	} else {
 		return OneWayThread{
@@ -34,6 +36,7 @@ func NewOneWayThread(direction string, container *Container, db *database.Databa
 			Destination: container.Source,
 			Container:   container,
 			Database:    db,
+			DBConn:      dbConn,
 		}
 	}
 }
@@ -67,12 +70,22 @@ func (oneway *OneWayThread) StartOneWayThread(wg *sync.WaitGroup) {
 		}
 		totalData = append(totalData, bytes[:numBytesRead]...)
 	}
+	record := database.Data{
+		Direction:     oneway.Direction,
+		Data:          string(totalData),
+		ConnectionsID: oneway.DBConn.ID,
+		Connection:    oneway.DBConn,
+	}
 	if strings.ToLower(oneway.Direction) == "request" && oneway.Container.Svc.RequestSave {
 		log.Printf("Request data: %s", string(totalData))
-		oneway.Database.Write(string(totalData))
+		if err := oneway.Database.Write(record); err != nil {
+			log.Fatalf("error writing record to database: %+v: %v", record, err)
+		}
 	}
 	if strings.ToLower(oneway.Direction) == "response" && oneway.Container.Svc.ResponseSave {
 		log.Printf("Response data: %s", string(totalData))
-		oneway.Database.Write(string(totalData))
+		if err := oneway.Database.Write(record); err != nil {
+			log.Fatalf("error writing record to database: %+v: %v", record, err)
+		}
 	}
 }
