@@ -93,13 +93,11 @@ func (dc *DatabaseContainer) CreateNetwork(ctx context.Context) error {
 }
 
 func (dc *DatabaseContainer) StartContainer(ctx context.Context) error {
-	var imageName string
 	var envVars []string
 	var volumeMount string
 
 	switch dc.Config.DBType {
 	case "postgres", "postgresql":
-		imageName = "postgres:15"
 		envVars = []string{
 			fmt.Sprintf("POSTGRES_DB=%s", DatabaseContainerName),
 			fmt.Sprintf("POSTGRES_USER=%s", dc.Config.User),
@@ -107,7 +105,6 @@ func (dc *DatabaseContainer) StartContainer(ctx context.Context) error {
 		}
 		volumeMount = "/var/lib/postgresql/data"
 	case "sqlite":
-		imageName = "nouchka/sqlite3:latest"
 		envVars = []string{}
 		volumeMount = "/data"
 	default:
@@ -123,7 +120,7 @@ func (dc *DatabaseContainer) StartContainer(ctx context.Context) error {
 	var hostConfig *container.HostConfig
 
 	containerConfig = &container.Config{
-		Image: imageName,
+		Image: dc.Config.DBImageName,
 		Env:   envVars,
 		Labels: map[string]string{
 			"hpotter": "database",
