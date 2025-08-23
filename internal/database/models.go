@@ -1,7 +1,6 @@
 package database
 
 import (
-	"net"
 	"time"
 
 	"gorm.io/gorm"
@@ -10,9 +9,9 @@ import (
 type Connections struct {
 	ID                 uint      `gorm:"primaryKey" json:"id"`
 	CreatedAt          time.Time `gorm:"autoCreateTime" json:"created_at"`
-	SourceAddress      net.IP    `gorm:"type:inet" json:"source_address"`
+	SourceAddress      string    `gorm:"type:inet" json:"source_address"`
 	SourcePort         int       `json:"source_port"`
-	DestinationAddress net.IP    `gorm:"type:inet" json:"destination_address"`
+	DestinationAddress string    `gorm:"type:inet" json:"destination_address"`
 	DestinationPort    int       `json:"destination_port"`
 	Latitude           string    `json:"latitude"`
 	Longitude          string    `json:"longitude"`

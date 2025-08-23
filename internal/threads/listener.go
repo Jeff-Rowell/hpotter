@@ -78,24 +78,32 @@ func handleConnection(containerThread Container, ctx context.Context, wg *sync.W
 }
 
 func buildConnection(imageName string, conn net.Conn) *database.Connections {
+	var srcAddr string
 	var srcPort int
+	var destAddr string
 	var destPort int
 	var proto int
 	switch addr := conn.LocalAddr().(type) {
 	case *net.UDPAddr:
+		srcAddr = addr.IP.String()
 		srcPort = addr.Port
-		destPort = conn.RemoteAddr().(*net.UDPAddr).Port
+		remoteAddr := conn.RemoteAddr().(*net.UDPAddr)
+		destAddr = remoteAddr.IP.String()
+		destPort = remoteAddr.Port
 		proto = 6
 	case *net.TCPAddr:
+		srcAddr = addr.IP.String()
 		srcPort = addr.Port
-		destPort = conn.RemoteAddr().(*net.TCPAddr).Port
+		remoteAddr := conn.RemoteAddr().(*net.TCPAddr)
+		destAddr = remoteAddr.IP.String()
+		destPort = remoteAddr.Port
 		proto = 17
 	}
 	dbConn := &database.Connections{
 		CreatedAt:          time.Now().UTC(),
-		SourceAddress:      net.IP(conn.LocalAddr().String()),
+		SourceAddress:      srcAddr,
 		SourcePort:         srcPort,
-		DestinationAddress: net.IP(conn.RemoteAddr().String()),
+		DestinationAddress: destAddr,
 		DestinationPort:    destPort,
 		Container:          imageName,
 		Proto:              proto,
