@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"sync"
+	"time"
 
 	"github.com/Jeff-Rowell/hpotter/types"
 	"gorm.io/driver/postgres"
@@ -54,15 +55,23 @@ func (d *Database) connect() error {
 	}
 
 	var err error
-	d.DB, err = gorm.Open(dialector, &gorm.Config{
-		Logger: logger.Default.LogMode(logger.Info),
-	})
+	var errSlice []error
+	for range 10 {
+		d.DB, err = gorm.Open(dialector, &gorm.Config{
+			Logger: logger.Default.LogMode(logger.Silent),
+		})
 
-	if err != nil {
-		return fmt.Errorf("failed to open database connection: %w", err)
+		if err != nil {
+			errSlice = append(errSlice, err)
+			time.Sleep(2 * time.Second)
+		}
 	}
 
-	log.Printf("Connected to %s database", d.config.DBType)
+	if len(errSlice) == 10 {
+		return fmt.Errorf("failed to open database connection 10 times: %w", err)
+	}
+
+	log.Printf("connected to %s database", d.config.DBType)
 	return nil
 }
 
@@ -71,12 +80,11 @@ func (d *Database) buildSQLiteConnectionString() string {
 }
 
 func (d *Database) buildPostgresConnectionString() string {
-	user := "postgres"
 	host := "localhost"
 	port := "5432"
 	dbname := "hpotter-database"
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
-		host, user, d.config.Password, dbname, port)
+		host, d.config.User, d.config.Password, dbname, port)
 
 	return dsn
 }

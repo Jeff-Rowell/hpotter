@@ -81,7 +81,6 @@ func (dc *DatabaseContainer) CreateNetwork(ctx context.Context) error {
 		Labels: map[string]string{
 			"hpotter": "database-network",
 		},
-		Internal: true, // Make it isolated from external networks
 	})
 	if err != nil {
 		return fmt.Errorf("failed to create network: %w", err)
