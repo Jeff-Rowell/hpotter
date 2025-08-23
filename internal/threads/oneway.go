@@ -74,7 +74,6 @@ func (oneway *OneWayThread) StartOneWayThread(wg *sync.WaitGroup) {
 		Direction:     oneway.Direction,
 		Data:          string(totalData),
 		ConnectionsID: oneway.DBConn.ID,
-		Connection:    oneway.DBConn,
 	}
 	if strings.ToLower(oneway.Direction) == "request" && oneway.Container.Svc.RequestSave {
 		log.Printf("Request data: %s", string(totalData))
