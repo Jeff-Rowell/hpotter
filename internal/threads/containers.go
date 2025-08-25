@@ -145,9 +145,12 @@ func (c *Container) Communicate(wg *sync.WaitGroup, db *database.Database, dbCon
 }
 
 func (c *Container) GetOurContainers() []container.Summary {
+	listCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
 	filters := filters.NewArgs()
 	filters.Add("label", "hpotter=container")
-	containers, err := c.DockerClient.ContainerList(context.Background(), container.ListOptions{Filters: filters})
+	containers, err := c.DockerClient.ContainerList(listCtx, container.ListOptions{Filters: filters})
 	if err != nil {
 		log.Fatalf("error listing containers by hpotter=container label: %v", err)
 	}
@@ -155,10 +158,13 @@ func (c *Container) GetOurContainers() []container.Summary {
 }
 
 func (c *Container) RemoveContainer(containerID, imageName string) {
+	cleanupCtx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+	defer cancel()
+
 	removeOps := container.RemoveOptions{
 		Force: true,
 	}
-	if err := c.DockerClient.ContainerRemove(context.Background(), containerID, removeOps); err != nil {
+	if err := c.DockerClient.ContainerRemove(cleanupCtx, containerID, removeOps); err != nil {
 		log.Printf("error removing container %s running image %s: %v", containerID, imageName, err)
 		return
 	}

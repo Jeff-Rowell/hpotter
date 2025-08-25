@@ -8,6 +8,7 @@ import (
 	"os/signal"
 	"sync"
 	"syscall"
+	"time"
 
 	"github.com/Jeff-Rowell/hpotter/internal/database"
 	"github.com/Jeff-Rowell/hpotter/internal/parser"
@@ -46,7 +47,9 @@ func main() {
 
 	defer func() {
 		log.Printf("cleaning up database resources...")
-		if err := dbContainer.Cleanup(ctx); err != nil {
+		cleanupCtx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
+		defer cancel()
+		if err := dbContainer.Cleanup(cleanupCtx); err != nil {
 			log.Printf("failed to cleanup database resources: %v", err)
 		}
 	}()
