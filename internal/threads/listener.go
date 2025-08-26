@@ -61,7 +61,7 @@ func StartListener(service types.Service, wg *sync.WaitGroup, ctx context.Contex
 			go writeConnection(dbConn, db)
 
 			containerThread := NewContainerThread(service, conn, ctx)
-			go handleConnection(containerThread, ctx, wg, db, dbConn)
+			go handleConnection(containerThread, wg, db, dbConn)
 			defer containerThread.RemoveAllContainers()
 		case err := <-errChan:
 			log.Printf("error: failed to accept connection: %v", err)
@@ -70,11 +70,11 @@ func StartListener(service types.Service, wg *sync.WaitGroup, ctx context.Contex
 	}
 }
 
-func handleConnection(containerThread Container, ctx context.Context, wg *sync.WaitGroup, db *database.Database, dbConn *database.Connections) {
+func handleConnection(containerThread Container, wg *sync.WaitGroup, db *database.Database, dbConn *database.Connections) {
 	containerThread.LaunchContainer()
 	containerThread.Connect()
 	containerThread.Communicate(wg, db, dbConn)
-	<-ctx.Done()
+	wg.Wait()
 }
 
 func buildConnection(imageName string, conn net.Conn) *database.Connections {
