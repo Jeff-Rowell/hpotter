@@ -91,6 +91,22 @@ func (dc *DatabaseContainer) CreateNetwork(ctx context.Context) error {
 	return nil
 }
 
+func (dc *DatabaseContainer) CheckExistingNetwork(ctx context.Context) (bool, error) {
+	networks, err := dc.Client.NetworkList(ctx, network.ListOptions{})
+	if err != nil {
+		return false, fmt.Errorf("failed to list networks: %w", err)
+	}
+
+	for _, net := range networks {
+		if net.Name == DatabaseNetworkName {
+			dc.NetworkID = net.ID
+			log.Printf("found existing database network: %s", DatabaseNetworkName)
+			return true, nil
+		}
+	}
+	return false, nil
+}
+
 func (dc *DatabaseContainer) StartContainer(ctx context.Context) error {
 	var envVars []string
 	var volumeMount string
@@ -234,8 +250,17 @@ func (dc *DatabaseContainer) ensureContainerRunning(ctx context.Context) error {
 
 	log.Printf("database volume exists but container is not running, starting container")
 
-	if err := dc.CreateNetwork(ctx); err != nil {
-		return fmt.Errorf("failed to create network: %w", err)
+	networkExists, err := dc.CheckExistingNetwork(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to check existing network: %w", err)
+	}
+
+	if !networkExists {
+		if err := dc.CreateNetwork(ctx); err != nil {
+			return fmt.Errorf("failed to create network: %w", err)
+		}
+	} else {
+		log.Printf("using existing database network")
 	}
 
 	if err := dc.StartContainer(ctx); err != nil {
