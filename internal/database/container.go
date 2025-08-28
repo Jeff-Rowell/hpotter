@@ -6,6 +6,7 @@ import (
 	"log"
 	"slices"
 	"strconv"
+	"time"
 
 	"github.com/Jeff-Rowell/hpotter/types"
 	"github.com/docker/go-connections/nat"
@@ -29,22 +30,28 @@ type DatabaseContainer struct {
 	ContainerID string
 	NetworkID   string
 	VolumeName  string
+	ctx         context.Context
+	cancelFunc  context.CancelFunc
 }
 
-func NewDatabaseContainer(config types.DBConfig) (*DatabaseContainer, error) {
+func NewDatabaseContainer(ctx context.Context, config types.DBConfig) (*DatabaseContainer, error) {
 	dockerClient, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
 		return nil, fmt.Errorf("failed to create docker client: %w", err)
 	}
 
+	childCtx, cancelFunc := context.WithTimeout(ctx, 5*time.Minute)
+
 	return &DatabaseContainer{
-		Client: dockerClient,
-		Config: config,
+		Client:     dockerClient,
+		Config:     config,
+		ctx:        childCtx,
+		cancelFunc: cancelFunc,
 	}, nil
 }
 
-func (dc *DatabaseContainer) CheckExistingVolume(ctx context.Context) (bool, error) {
-	volumes, err := dc.Client.VolumeList(ctx, volume.ListOptions{})
+func (dc *DatabaseContainer) CheckExistingVolume() (bool, error) {
+	volumes, err := dc.Client.VolumeList(dc.ctx, volume.ListOptions{})
 	if err != nil {
 		return false, fmt.Errorf("failed to list volumes: %w", err)
 	}
@@ -59,8 +66,8 @@ func (dc *DatabaseContainer) CheckExistingVolume(ctx context.Context) (bool, err
 	return false, nil
 }
 
-func (dc *DatabaseContainer) CreateVolume(ctx context.Context) error {
-	volumeResponse, err := dc.Client.VolumeCreate(ctx, volume.CreateOptions{
+func (dc *DatabaseContainer) CreateVolume() error {
+	volumeResponse, err := dc.Client.VolumeCreate(dc.ctx, volume.CreateOptions{
 		Name: DatabaseVolumeName,
 		Labels: map[string]string{
 			"hpotter": "database-volume",
@@ -75,8 +82,8 @@ func (dc *DatabaseContainer) CreateVolume(ctx context.Context) error {
 	return nil
 }
 
-func (dc *DatabaseContainer) CreateNetwork(ctx context.Context) error {
-	networkResponse, err := dc.Client.NetworkCreate(ctx, DatabaseNetworkName, network.CreateOptions{
+func (dc *DatabaseContainer) CreateNetwork() error {
+	networkResponse, err := dc.Client.NetworkCreate(dc.ctx, DatabaseNetworkName, network.CreateOptions{
 		Driver: "bridge",
 		Labels: map[string]string{
 			"hpotter": "database-network",
@@ -91,8 +98,8 @@ func (dc *DatabaseContainer) CreateNetwork(ctx context.Context) error {
 	return nil
 }
 
-func (dc *DatabaseContainer) CheckExistingNetwork(ctx context.Context) (bool, error) {
-	networks, err := dc.Client.NetworkList(ctx, network.ListOptions{})
+func (dc *DatabaseContainer) CheckExistingNetwork() (bool, error) {
+	networks, err := dc.Client.NetworkList(dc.ctx, network.ListOptions{})
 	if err != nil {
 		return false, fmt.Errorf("failed to list networks: %w", err)
 	}
@@ -107,7 +114,7 @@ func (dc *DatabaseContainer) CheckExistingNetwork(ctx context.Context) (bool, er
 	return false, nil
 }
 
-func (dc *DatabaseContainer) StartContainer(ctx context.Context) error {
+func (dc *DatabaseContainer) StartContainer() error {
 	var envVars []string
 	var volumeMount string
 
@@ -126,7 +133,7 @@ func (dc *DatabaseContainer) StartContainer(ctx context.Context) error {
 		return fmt.Errorf("unsupported database type: %s", dc.Config.DBType)
 	}
 
-	if dc.containerExists(ctx) {
+	if dc.containerExists() {
 		log.Printf("database container already exists: %s", DatabaseContainerName)
 		return nil
 	}
@@ -176,7 +183,7 @@ func (dc *DatabaseContainer) StartContainer(ctx context.Context) error {
 	}
 
 	createdContainer, err := dc.Client.ContainerCreate(
-		ctx,
+		dc.ctx,
 		containerConfig,
 		hostConfig,
 		&network.NetworkingConfig{
@@ -193,7 +200,7 @@ func (dc *DatabaseContainer) StartContainer(ctx context.Context) error {
 
 	dc.ContainerID = createdContainer.ID
 
-	err = dc.Client.ContainerStart(ctx, dc.ContainerID, container.StartOptions{})
+	err = dc.Client.ContainerStart(dc.ctx, dc.ContainerID, container.StartOptions{})
 	if err != nil {
 		return fmt.Errorf("failed to start container: %w", err)
 	}
@@ -202,11 +209,11 @@ func (dc *DatabaseContainer) StartContainer(ctx context.Context) error {
 	return nil
 }
 
-func (dc *DatabaseContainer) containerExists(ctx context.Context) bool {
+func (dc *DatabaseContainer) containerExists() bool {
 	filters := filters.NewArgs()
 	filters.Add("name", DatabaseContainerName)
 
-	containers, err := dc.Client.ContainerList(ctx, container.ListOptions{
+	containers, err := dc.Client.ContainerList(dc.ctx, container.ListOptions{
 		All:     true,
 		Filters: filters,
 	})
@@ -219,7 +226,7 @@ func (dc *DatabaseContainer) containerExists(ctx context.Context) bool {
 			dc.ContainerID = cont.ID
 			// Start the container if it's not running
 			if cont.State != "running" {
-				dc.Client.ContainerStart(ctx, cont.ID, container.StartOptions{})
+				dc.Client.ContainerStart(dc.ctx, cont.ID, container.StartOptions{})
 			}
 			return true
 		}
@@ -227,59 +234,59 @@ func (dc *DatabaseContainer) containerExists(ctx context.Context) bool {
 	return false
 }
 
-func (dc *DatabaseContainer) Setup(ctx context.Context) error {
-	volumeExists, err := dc.CheckExistingVolume(ctx)
+func (dc *DatabaseContainer) Setup() error {
+	volumeExists, err := dc.CheckExistingVolume()
 	if err != nil {
 		return fmt.Errorf("failed to check existing volume: %w", err)
 	}
 
 	if volumeExists {
 		log.Printf("using existing database volume")
-		return dc.ensureContainerRunning(ctx)
+		return dc.ensureContainerRunning()
 	} else {
 		log.Printf("creating new database infrastructure")
-		return dc.createFreshDatabase(ctx)
+		return dc.createFreshDatabase()
 	}
 }
 
-func (dc *DatabaseContainer) ensureContainerRunning(ctx context.Context) error {
-	if dc.containerExists(ctx) {
+func (dc *DatabaseContainer) ensureContainerRunning() error {
+	if dc.containerExists() {
 		log.Printf("database container is already running")
 		return nil
 	}
 
 	log.Printf("database volume exists but container is not running, starting container")
 
-	networkExists, err := dc.CheckExistingNetwork(ctx)
+	networkExists, err := dc.CheckExistingNetwork()
 	if err != nil {
 		return fmt.Errorf("failed to check existing network: %w", err)
 	}
 
 	if !networkExists {
-		if err := dc.CreateNetwork(ctx); err != nil {
+		if err := dc.CreateNetwork(); err != nil {
 			return fmt.Errorf("failed to create network: %w", err)
 		}
 	} else {
 		log.Printf("using existing database network")
 	}
 
-	if err := dc.StartContainer(ctx); err != nil {
+	if err := dc.StartContainer(); err != nil {
 		return fmt.Errorf("failed to start container: %w", err)
 	}
 
 	return nil
 }
 
-func (dc *DatabaseContainer) createFreshDatabase(ctx context.Context) error {
-	if err := dc.CreateVolume(ctx); err != nil {
+func (dc *DatabaseContainer) createFreshDatabase() error {
+	if err := dc.CreateVolume(); err != nil {
 		return fmt.Errorf("failed to create volume: %w", err)
 	}
 
-	if err := dc.CreateNetwork(ctx); err != nil {
+	if err := dc.CreateNetwork(); err != nil {
 		return fmt.Errorf("failed to create network: %w", err)
 	}
 
-	if err := dc.StartContainer(ctx); err != nil {
+	if err := dc.StartContainer(); err != nil {
 		return fmt.Errorf("failed to start container: %w", err)
 	}
 
@@ -287,6 +294,10 @@ func (dc *DatabaseContainer) createFreshDatabase(ctx context.Context) error {
 }
 
 func (dc *DatabaseContainer) Cleanup(ctx context.Context) error {
+	if dc.cancelFunc != nil {
+		dc.cancelFunc()
+	}
+
 	if dc.ContainerID != "" {
 		if err := dc.Client.ContainerRemove(ctx, dc.ContainerID, container.RemoveOptions{
 			Force: true,

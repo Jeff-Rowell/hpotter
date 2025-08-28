@@ -36,12 +36,12 @@ func main() {
 	config := parser.NewParser()
 	config.Parse(flags.configJson)
 
-	dbContainer, err := database.NewDatabaseContainer(config.DBConfig)
+	dbContainer, err := database.NewDatabaseContainer(ctx, config.DBConfig)
 	if err != nil {
 		log.Fatalf("failed to create database container manager: %v", err)
 	}
 
-	if err := dbContainer.Setup(ctx); err != nil {
+	if err := dbContainer.Setup(); err != nil {
 		log.Fatalf("failed to setup database: %v", err)
 	}
 
