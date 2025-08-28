@@ -1,6 +1,8 @@
 package threads
 
 import (
+	"fmt"
+	"io"
 	"log"
 	"net"
 	"strings"
@@ -44,6 +46,31 @@ func NewOneWayThread(direction string, container *Container, db *database.Databa
 func (oneway *OneWayThread) StartOneWayThread(wg *sync.WaitGroup) {
 	defer wg.Done()
 	var totalData []byte
+	var consecutiveEOFs int
+
+	defer func() {
+		log.Printf("terminating oneway '%s' thread...", oneway.Direction)
+		if len(totalData) > 0 {
+			dataString := fmt.Sprintf("%q", totalData)
+			record := &database.Data{
+				Direction:     oneway.Direction,
+				Data:          dataString,
+				ConnectionsID: oneway.DBConn.ID,
+			}
+			if strings.ToLower(oneway.Direction) == "request" && oneway.Container.Svc.RequestSave {
+				if err := oneway.Database.Write(record); err != nil {
+					log.Printf("error writing 'request' record to database: %+v: %v", record, err)
+				}
+				log.Println("successfully wrote 'request' data to db")
+			}
+			if strings.ToLower(oneway.Direction) == "response" && oneway.Container.Svc.ResponseSave {
+				if err := oneway.Database.Write(record); err != nil {
+					log.Printf("error writing 'response' record to database: %+v: %v", record, err)
+				}
+				log.Println("successfully wrote 'response' data to db")
+			}
+		}
+	}()
 	for {
 		select {
 		case <-oneway.Container.Ctx.Done():
@@ -58,33 +85,41 @@ func (oneway *OneWayThread) StartOneWayThread(wg *sync.WaitGroup) {
 			if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
 				continue
 			}
+			if err == io.EOF {
+				consecutiveEOFs++
+				// If we get multiple consecutive EOFs, the connection is likely closed
+				if consecutiveEOFs >= 2 {
+					return
+				}
+				continue
+			}
 			return
 		}
 		if numBytesRead == 0 {
 			break
 		}
+		consecutiveEOFs = 0
+		totalData = append(totalData, bytes[:numBytesRead]...)
+
+		oneway.Destination.SetWriteDeadline(time.Now().Add(1 * time.Second))
 		_, err = oneway.Destination.Write(bytes[:numBytesRead])
 		if err != nil {
-			log.Printf("error writing bytes in %s thread to container %s: %v", oneway.Direction, oneway.Container.CreateResponse.ID, err)
-			return
-		}
-		totalData = append(totalData, bytes[:numBytesRead]...)
-	}
-	record := database.Data{
-		Direction:     oneway.Direction,
-		Data:          string(totalData),
-		ConnectionsID: oneway.DBConn.ID,
-	}
-	if strings.ToLower(oneway.Direction) == "request" && oneway.Container.Svc.RequestSave {
-		log.Printf("Request data: %s", string(totalData))
-		if err := oneway.Database.Write(record); err != nil {
-			log.Fatalf("error writing record to database: %+v: %v", record, err)
+			if isConnectionClosed(err) {
+				return
+			}
+			break
 		}
 	}
-	if strings.ToLower(oneway.Direction) == "response" && oneway.Container.Svc.ResponseSave {
-		log.Printf("Response data: %s", string(totalData))
-		if err := oneway.Database.Write(record); err != nil {
-			log.Fatalf("error writing record to database: %+v: %v", record, err)
-		}
+}
+
+func isConnectionClosed(err error) bool {
+	if err == nil {
+		return false
 	}
+
+	errStr := err.Error()
+	return strings.Contains(errStr, "broken pipe") ||
+		strings.Contains(errStr, "connection reset by peer") ||
+		strings.Contains(errStr, "use of closed network connection") ||
+		strings.Contains(errStr, "connection refused")
 }
