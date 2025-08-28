@@ -21,7 +21,7 @@ func StartListener(service types.Service, wg *sync.WaitGroup, ctx context.Contex
 	var err error
 	var listenSocket net.Listener
 	if service.ListenAddress == "" {
-		service.ListenAddress = "0.0.0.0"
+		service.ListenAddress = "127.0.0.1"
 	}
 
 	listenSocket, err = net.Listen(lowerProto, fmt.Sprintf("%s:%d", service.ListenAddress, service.ListenPort))
