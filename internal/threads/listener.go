@@ -85,18 +85,18 @@ func buildConnection(imageName string, conn net.Conn) *database.Connections {
 	var proto int
 	switch addr := conn.LocalAddr().(type) {
 	case *net.UDPAddr:
-		srcAddr = addr.IP.String()
-		srcPort = addr.Port
 		remoteAddr := conn.RemoteAddr().(*net.UDPAddr)
-		destAddr = remoteAddr.IP.String()
-		destPort = remoteAddr.Port
+		srcAddr = remoteAddr.IP.String()
+		srcPort = remoteAddr.Port
+		destAddr = addr.IP.String()
+		destPort = addr.Port
 		proto = 6
 	case *net.TCPAddr:
-		srcAddr = addr.IP.String()
-		srcPort = addr.Port
 		remoteAddr := conn.RemoteAddr().(*net.TCPAddr)
-		destAddr = remoteAddr.IP.String()
-		destPort = remoteAddr.Port
+		srcAddr = remoteAddr.IP.String()
+		srcPort = remoteAddr.Port
+		destAddr = addr.IP.String()
+		destPort = addr.Port
 		proto = 17
 	}
 	dbConn := &database.Connections{
