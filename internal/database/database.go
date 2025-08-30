@@ -3,32 +3,22 @@ package database
 import (
 	"fmt"
 	"log"
-	"sync"
 	"time"
 
 	"github.com/Jeff-Rowell/hpotter/types"
 	"gorm.io/driver/postgres"
-	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
 )
 
 type Database struct {
-	DB         *gorm.DB
-	config     types.DBConfig
-	lockNeeded bool
-	mu         sync.Mutex
+	DB     *gorm.DB
+	config types.DBConfig
 }
 
 func NewDatabase(config types.DBConfig) (*Database, error) {
 	db := &Database{
-		config:     config,
-		lockNeeded: false,
-	}
-
-	// Determine if locking is needed (for SQLite)
-	if config.DBType == "sqlite" {
-		db.lockNeeded = true
+		config: config,
 	}
 
 	if err := db.connect(); err != nil {
@@ -43,16 +33,7 @@ func NewDatabase(config types.DBConfig) (*Database, error) {
 }
 
 func (d *Database) connect() error {
-	var dialector gorm.Dialector
-
-	switch d.config.DBType {
-	case "sqlite":
-		dialector = sqlite.Open(d.buildSQLiteConnectionString())
-	case "postgres", "postgresql":
-		dialector = postgres.Open(d.buildPostgresConnectionString())
-	default:
-		return fmt.Errorf("unsupported database type: %s", d.config.DBType)
-	}
+	dialector := postgres.Open(d.buildPostgresConnectionString())
 
 	var err error
 	var errSlice []error
@@ -75,10 +56,6 @@ func (d *Database) connect() error {
 	return nil
 }
 
-func (d *Database) buildSQLiteConnectionString() string {
-	return "hpotter.db"
-}
-
 func (d *Database) buildPostgresConnectionString() string {
 	host := "localhost"
 	port := "5432"
@@ -94,11 +71,6 @@ func (d *Database) migrate() error {
 }
 
 func (d *Database) Write(record any) error {
-	if d.lockNeeded {
-		d.mu.Lock()
-		defer d.mu.Unlock()
-	}
-
 	return d.DB.Create(record).Error
 }
 

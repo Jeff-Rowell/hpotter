@@ -118,20 +118,12 @@ func (dc *DatabaseContainer) StartContainer() error {
 	var envVars []string
 	var volumeMount string
 
-	switch dc.Config.DBType {
-	case "postgres", "postgresql":
-		envVars = []string{
-			fmt.Sprintf("POSTGRES_DB=%s", DatabaseContainerName),
-			fmt.Sprintf("POSTGRES_USER=%s", dc.Config.User),
-			fmt.Sprintf("POSTGRES_PASSWORD=%s", dc.Config.Password),
-		}
-		volumeMount = "/var/lib/postgresql/data"
-	case "sqlite":
-		envVars = []string{}
-		volumeMount = "/data"
-	default:
-		return fmt.Errorf("unsupported database type: %s", dc.Config.DBType)
+	envVars = []string{
+		fmt.Sprintf("POSTGRES_DB=%s", DatabaseContainerName),
+		fmt.Sprintf("POSTGRES_USER=%s", dc.Config.User),
+		fmt.Sprintf("POSTGRES_PASSWORD=%s", dc.Config.Password),
 	}
+	volumeMount = "/var/lib/postgresql/data"
 
 	if dc.containerExists() {
 		log.Printf("database container already exists: %s", DatabaseContainerName)
@@ -162,24 +154,22 @@ func (dc *DatabaseContainer) StartContainer() error {
 		},
 	}
 
-	if dc.Config.DBType == "postgres" || dc.Config.DBType == "postgresql" {
-		port, err := nat.NewPort("tcp", "5432")
-		if err != nil {
-			return fmt.Errorf("failed to create port: %w", err)
-		}
+	port, err := nat.NewPort("tcp", "5432")
+	if err != nil {
+		return fmt.Errorf("failed to create port: %w", err)
+	}
 
-		portInt, _ := strconv.Atoi("5432")
-		containerPortBinding := nat.PortBinding{
-			HostIP:   "127.0.0.1",
-			HostPort: strconv.Itoa(portInt),
-		}
+	portInt, _ := strconv.Atoi("5432")
+	containerPortBinding := nat.PortBinding{
+		HostIP:   "127.0.0.1",
+		HostPort: strconv.Itoa(portInt),
+	}
 
-		containerConfig.ExposedPorts = nat.PortSet{
-			port: struct{}{},
-		}
-		hostConfig.PortBindings = nat.PortMap{
-			port: []nat.PortBinding{containerPortBinding},
-		}
+	containerConfig.ExposedPorts = nat.PortSet{
+		port: struct{}{},
+	}
+	hostConfig.PortBindings = nat.PortMap{
+		port: []nat.PortBinding{containerPortBinding},
 	}
 
 	createdContainer, err := dc.Client.ContainerCreate(
