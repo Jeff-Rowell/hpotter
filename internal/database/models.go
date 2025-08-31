@@ -13,8 +13,8 @@ type Connections struct {
 	SourcePort         int       `json:"source_port"`
 	DestinationAddress string    `gorm:"type:inet" json:"destination_address"`
 	DestinationPort    int       `json:"destination_port"`
-	Latitude           string    `json:"latitude"`
-	Longitude          string    `json:"longitude"`
+	Latitude           float32   `json:"latitude"`
+	Longitude          float32   `json:"longitude"`
 	Container          string    `json:"container"`
 	Proto              int       `json:"proto"`
 

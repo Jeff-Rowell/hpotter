@@ -2,12 +2,17 @@ package threads
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"io"
 	"log"
 	"net"
+	"net/http"
 	"strings"
 	"sync"
 	"time"
+
+	retryablehttp "github.com/hashicorp/go-retryablehttp"
 
 	"github.com/Jeff-Rowell/hpotter/internal/database"
 	"github.com/Jeff-Rowell/hpotter/types"
@@ -78,37 +83,77 @@ func handleConnection(containerThread Container, wg *sync.WaitGroup, db *databas
 }
 
 func buildConnection(imageName string, conn net.Conn) *database.Connections {
-	var srcAddr string
-	var srcPort int
-	var destAddr string
-	var destPort int
-	var proto int
+	var dbConn database.Connections
+
 	switch addr := conn.LocalAddr().(type) {
 	case *net.UDPAddr:
 		remoteAddr := conn.RemoteAddr().(*net.UDPAddr)
-		srcAddr = remoteAddr.IP.String()
-		srcPort = remoteAddr.Port
-		destAddr = addr.IP.String()
-		destPort = addr.Port
-		proto = 6
+		sourceLat, sourceLong, err := getLatitudeLongitude(remoteAddr.IP.String())
+		if err != nil {
+			log.Fatalf("error getting latitude and longitude: %v", err)
+		}
+		dbConn = database.Connections{
+			CreatedAt:          time.Now().UTC(),
+			SourceAddress:      remoteAddr.IP.String(),
+			SourcePort:         remoteAddr.Port,
+			DestinationAddress: addr.IP.String(),
+			DestinationPort:    addr.Port,
+			Latitude:           sourceLat,
+			Longitude:          sourceLong,
+			Container:          imageName,
+			Proto:              6,
+		}
 	case *net.TCPAddr:
 		remoteAddr := conn.RemoteAddr().(*net.TCPAddr)
-		srcAddr = remoteAddr.IP.String()
-		srcPort = remoteAddr.Port
-		destAddr = addr.IP.String()
-		destPort = addr.Port
-		proto = 17
+		sourceLat, sourceLong, err := getLatitudeLongitude(remoteAddr.IP.String())
+		if err != nil {
+			log.Fatalf("error getting latitude and longitude: %v", err)
+		}
+		dbConn = database.Connections{
+			CreatedAt:          time.Now().UTC(),
+			SourceAddress:      remoteAddr.IP.String(),
+			SourcePort:         remoteAddr.Port,
+			DestinationAddress: addr.IP.String(),
+			DestinationPort:    addr.Port,
+			Latitude:           sourceLat,
+			Longitude:          sourceLong,
+			Container:          imageName,
+			Proto:              17,
+		}
 	}
-	dbConn := &database.Connections{
-		CreatedAt:          time.Now().UTC(),
-		SourceAddress:      srcAddr,
-		SourcePort:         srcPort,
-		DestinationAddress: destAddr,
-		DestinationPort:    destPort,
-		Container:          imageName,
-		Proto:              proto,
+	return &dbConn
+}
+
+func getLatitudeLongitude(ipAddr string) (float32, float32, error) {
+	client := retryablehttp.NewClient()
+	client.RetryMax = 5
+	client.RetryWaitMin = 1 * time.Second
+	client.RetryWaitMax = 30 * time.Second
+	client.Logger = nil
+
+	httpClient := client.StandardClient()
+	req, err := http.NewRequest("GET", fmt.Sprintf("http://ip-api.com/json/%s", ipAddr), nil)
+	if err != nil {
+		return -1, -1, err
 	}
-	return dbConn
+
+	resp, err := httpClient.Do(req)
+	if err != nil {
+		return -1, -1, err
+	}
+	defer resp.Body.Close()
+
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return -1, -1, err
+	}
+
+	var results types.IPInfo
+	err = json.Unmarshal(bodyBytes, &results)
+	if err != nil {
+		return -1, -1, err
+	}
+	return results.Latitude, results.Longitude, nil
 }
 
 func writeConnection(dbConn *database.Connections, db *database.Database) {

@@ -23,3 +23,8 @@ type DBConfig struct {
 	Password    string `json:"password"`
 	DBImageName string `json:"image_name"`
 }
+
+type IPInfo struct {
+	Latitude  float32 `json:"lat"`
+	Longitude float32 `json:"lon"`
+}
