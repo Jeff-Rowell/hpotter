@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/Jeff-Rowell/hpotter/internal/services"
 	"github.com/Jeff-Rowell/hpotter/types"
 )
 
@@ -29,5 +30,17 @@ func (p *Parser) Parse(configJson string) {
 	if err := json.Unmarshal(data, &p); err != nil {
 		log.Println(err)
 		log.Fatalf("error: failed to unmarshal data from file '%s': %v", cleanConfigJson, err)
+	}
+
+	serviceRegistry := services.NewServiceRegistry()
+	for _, svc := range p.Services {
+		if svc.CollectCredentials {
+			if svc.ServiceName == "" {
+				log.Fatalf("error: service_name is required")
+			}
+			if !serviceRegistry.IsSupported(svc.ServiceName) {
+				log.Fatalf("error: service '%s' listening on '%d/%s' is not supported for credential collection: %s", svc.ServiceName, svc.ListenPort, svc.ListenProto, serviceRegistry.GetSupportedServicesString())
+			}
+		}
 	}
 }
