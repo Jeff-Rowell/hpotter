@@ -14,6 +14,7 @@ import (
 
 	retryablehttp "github.com/hashicorp/go-retryablehttp"
 
+	"github.com/Jeff-Rowell/hpotter/internal/credentials"
 	"github.com/Jeff-Rowell/hpotter/internal/database"
 	"github.com/Jeff-Rowell/hpotter/types"
 )
@@ -65,9 +66,12 @@ func StartListener(service types.Service, wg *sync.WaitGroup, ctx context.Contex
 			dbConn := buildConnection(service.ImageName, conn)
 			go writeConnection(dbConn, db)
 
-			containerThread := NewContainerThread(service, conn, ctx)
-			go handleConnection(containerThread, wg, db, dbConn)
-			defer containerThread.RemoveAllContainers()
+			if service.CollectCredentials {
+				go handleCredentialCollection(service, conn, ctx, wg, db, dbConn)
+			} else {
+				containerThread := NewContainerThread(service, conn, ctx)
+				go handleConnection(containerThread, wg, db, dbConn)
+			}
 		case err := <-errChan:
 			log.Printf("error: failed to accept connection: %v", err)
 			return
@@ -160,4 +164,25 @@ func writeConnection(dbConn *database.Connections, db *database.Database) {
 	if err := db.Write(dbConn); err != nil {
 		log.Fatalf("error writing connection to database: %+v: %v", dbConn, err)
 	}
+}
+
+func handleCredentialCollection(service types.Service, conn net.Conn, _ context.Context, _ *sync.WaitGroup, db *database.Database, dbConn *database.Connections) {
+	defer conn.Close()
+
+	log.Printf("starting credential collection for service on port %d", service.ListenPort)
+
+	collector, err := credentials.NewCredentialCollector(service, conn, db, dbConn)
+	if err != nil {
+		log.Printf("error creating credential collector: %v", err)
+		return
+	}
+
+	creds, err := collector.CollectCredentials()
+	if err != nil {
+		log.Printf("error collecting credentials: %v", err)
+		return
+	}
+
+	log.Printf("successfully collected credentials: user=%s, connection_id=%d", creds.Username, creds.ConnectionsID)
+	log.Printf("credential collection complete for connection from %s", conn.RemoteAddr())
 }

@@ -16,10 +16,8 @@ type CredentialCollector interface {
 
 // NewCredentialCollector creates an appropriate credential collector based on service configuration
 func NewCredentialCollector(service types.Service, conn net.Conn, db *database.Database, dbConn *database.Connections) (CredentialCollector, error) {
-	protocol := strings.ToLower(service.ListenProto)
-
 	switch {
-	case protocol == "tcp" && service.ListenPort == 23:
+	case strings.EqualFold(service.ServiceName, "telnet"):
 		return NewTelnetCredentialCollector(conn, db, dbConn), nil
 	default:
 		return nil, fmt.Errorf("no credential collector available for service on port %d", service.ListenPort)
