@@ -10,6 +10,7 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/Jeff-Rowell/hpotter/internal/cleanup"
 	"github.com/Jeff-Rowell/hpotter/internal/database"
 	"github.com/Jeff-Rowell/hpotter/internal/parser"
 	"github.com/Jeff-Rowell/hpotter/internal/threads"
@@ -46,6 +47,10 @@ func main() {
 	}
 
 	defer func() {
+		log.Printf("cleaning up resources...")
+		containerManager := cleanup.GetGlobalContainerManager()
+		containerManager.CleanupAllHPotterContainers()
+
 		log.Printf("cleaning up database resources...")
 		cleanupCtx, cancel := context.WithTimeout(context.Background(), 60*time.Second)
 		defer cancel()
