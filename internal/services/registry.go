@@ -19,6 +19,10 @@ var SupportedServices = []CredentialService{
 		Name:        "telnet",
 		Description: "Telnet service with username/password collection",
 	},
+	{
+		Name:        "ssh",
+		Description: "SSH service with username/password collection",
+	},
 }
 
 type ServiceRegistry struct{}
