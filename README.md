@@ -4,8 +4,8 @@
   <h1>HPotter</h1>
   <br>
   <div style="display: flex; align-items: center; justify-content: center;">
-      <img src="./static/honeypot.png" style="width: 285px; height: 350px; margin-left: -25px;">
-      <img src="./static/gopher.svg" style="width: 235px; height: 300px; padding-top: 100px; padding-left: 25px;">
+      <img src="./static/honeypot.png" style="width: 185px; height: 250px; margin-left: -25px;">
+      <img src="./static/gopher.svg" style="width: 135px; height: 300px; padding-top: 75px; padding-left: 25px;">
   </div>
 
 </div>
