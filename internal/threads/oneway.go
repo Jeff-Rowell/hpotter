@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/Jeff-Rowell/hpotter/internal/database"
+	"github.com/Jeff-Rowell/hpotter/internal/logparser"
 )
 
 type OneWayThread struct {
@@ -50,24 +51,45 @@ func (oneway *OneWayThread) StartOneWayThread(wg *sync.WaitGroup) {
 
 	defer func() {
 		log.Printf("terminating oneway '%s' thread...", oneway.Direction)
-		if len(totalData) > 0 {
-			dataString := fmt.Sprintf("%q", totalData)
-			record := &database.Data{
-				Direction:     oneway.Direction,
-				Data:          dataString,
-				ConnectionsID: oneway.DBConn.ID,
-			}
-			if strings.ToLower(oneway.Direction) == "request" && oneway.Container.Svc.RequestSave {
-				if err := oneway.Database.Write(record); err != nil {
-					log.Printf("error writing 'request' record to database: %+v: %v", record, err)
+
+		if strings.EqualFold(oneway.Direction, "request") {
+			factory := logparser.NewLogParserFactory()
+			if !factory.IsSupported(oneway.Container.Svc) {
+				// Service not supported for log parsing, save totalData as string
+				if len(totalData) > 0 && oneway.Container.Svc.RequestSave {
+					record := &database.Data{
+						Direction:     oneway.Direction,
+						Data:          fmt.Sprintf("%q", totalData),
+						ConnectionsID: oneway.DBConn.ID,
+					}
+					if err := oneway.Database.Write(record); err != nil {
+						log.Fatalf("error writing request data to database: %+v: %v", record, err)
+					}
+					log.Println("successfully wrote request data to db")
 				}
-				log.Println("successfully wrote 'request' data to db")
+				return
 			}
-			if strings.ToLower(oneway.Direction) == "response" && oneway.Container.Svc.ResponseSave {
-				if err := oneway.Database.Write(record); err != nil {
-					log.Printf("error writing 'response' record to database: %+v: %v", record, err)
-				}
-				log.Println("successfully wrote 'response' data to db")
+
+			logData, err := oneway.Container.ReadLogs()
+			if err != nil {
+				log.Fatalf("error reading container logs: %v", err)
+			}
+
+			parser, err := factory.CreateParser(oneway.Container.Svc)
+			if err != nil {
+				log.Fatalf("error creating log parser: %v", err)
+			}
+
+			cred := parser.ParseCredentials(logData)
+			cred.ConnectionsID = oneway.DBConn.ID
+			if err := oneway.Database.Write(cred); err != nil {
+				log.Fatalf("error writing credential to database: %+v: %v", cred, err)
+			}
+
+			data := parser.ParseSessionData(logData)
+			data.ConnectionsID = oneway.DBConn.ID
+			if err := oneway.Database.Write(data); err != nil {
+				log.Fatalf("error writing session data to database: %+v: %v", data, err)
 			}
 		}
 	}()

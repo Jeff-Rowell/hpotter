@@ -1,4 +1,4 @@
-package parser
+package configparser
 
 import (
 	"encoding/json"
@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/Jeff-Rowell/hpotter/internal/logparser"
 	"github.com/Jeff-Rowell/hpotter/internal/services"
 	"github.com/Jeff-Rowell/hpotter/types"
 )
@@ -33,13 +34,28 @@ func (p *Parser) Parse(configJson string) {
 	}
 
 	serviceRegistry := services.NewServiceRegistry()
+	logParserFactory := logparser.NewLogParserFactory()
+
 	for _, svc := range p.Services {
+		if svc.CollectCredentials && (svc.CredentialLogPattern != "" || svc.SessionDataLogPattern != "") {
+			log.Fatalf("error: collect_credentials cannot be set with credential_log_pattern or session_data_log_pattern")
+		}
+
 		if svc.CollectCredentials {
 			if svc.ServiceName == "" {
 				log.Fatalf("error: service_name is required")
 			}
 			if !serviceRegistry.IsSupported(svc.ServiceName) {
 				log.Fatalf("error: service '%s' listening on '%d/%s' is not supported for credential collection: %s", svc.ServiceName, svc.ListenPort, svc.ListenProto, serviceRegistry.GetSupportedServicesString())
+			}
+		}
+
+		if logParserFactory.IsSupported(svc) {
+			if svc.CredentialLogPattern == "" {
+				log.Fatalf("error: credential_log_pattern is required for service '%s' as it supports log parsing", svc.ServiceName)
+			}
+			if svc.SessionDataLogPattern == "" {
+				log.Fatalf("error: session_data_log_pattern is required for service '%s' as it supports log parsing", svc.ServiceName)
 			}
 		}
 	}

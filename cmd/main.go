@@ -11,8 +11,8 @@ import (
 	"time"
 
 	"github.com/Jeff-Rowell/hpotter/internal/cleanup"
+	"github.com/Jeff-Rowell/hpotter/internal/configparser"
 	"github.com/Jeff-Rowell/hpotter/internal/database"
-	"github.com/Jeff-Rowell/hpotter/internal/parser"
 	"github.com/Jeff-Rowell/hpotter/internal/threads"
 )
 
@@ -34,7 +34,7 @@ func main() {
 	}()
 
 	flags := parseFlags()
-	config := parser.NewParser()
+	config := configparser.NewParser()
 	config.Parse(flags.configJson)
 
 	dbContainer, err := database.NewDatabaseContainer(ctx, config.DBConfig)

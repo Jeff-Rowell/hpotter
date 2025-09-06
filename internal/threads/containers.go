@@ -3,6 +3,7 @@ package threads
 import (
 	"context"
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"path/filepath"
@@ -141,4 +142,25 @@ func (c *Container) Communicate(wg *sync.WaitGroup, db *database.Database, dbCon
 	wg.Add(1)
 	responseThread := NewOneWayThread("response", c, db, *dbConn)
 	go responseThread.StartOneWayThread(wg)
+}
+
+func (c *Container) ReadLogs() (string, error) {
+	options := container.LogsOptions{
+		ShowStdout: true,
+		ShowStderr: true,
+		Timestamps: false,
+	}
+
+	logReader, err := c.DockerClient.ContainerLogs(c.Ctx, c.CreateResponse.ID, options)
+	if err != nil {
+		return "", fmt.Errorf("error reading container logs: %v", err)
+	}
+	defer logReader.Close()
+
+	logBytes, err := io.ReadAll(logReader)
+	if err != nil {
+		return "", fmt.Errorf("error reading log data: %v", err)
+	}
+
+	return string(logBytes), nil
 }
