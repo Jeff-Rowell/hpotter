@@ -37,11 +37,10 @@ func (p *Parser) Parse(configJson string) {
 	logParserFactory := logparser.NewLogParserFactory()
 
 	for _, svc := range p.Services {
-		if svc.CollectCredentials && (svc.CredentialLogPattern != "" || svc.SessionDataLogPattern != "") {
-			log.Fatalf("error: collect_credentials cannot be set with credential_log_pattern or session_data_log_pattern")
-		}
-
 		if svc.CollectCredentials {
+			if svc.CredentialLogPattern != "" || svc.SessionDataLogPattern != "" {
+				log.Fatalf("error: collect_credentials cannot be set with credential_log_pattern or session_data_log_pattern")
+			}
 			if svc.ServiceName == "" {
 				log.Fatalf("error: service_name is required")
 			}
