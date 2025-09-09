@@ -39,7 +39,7 @@ func NewContainerThread(service types.Service, source net.Conn, ctx context.Cont
 		"hpotter": "container",
 	}
 	return Container{
-		Ctx:          ctx,
+		Ctx:          context.Background(),
 		DockerClient: dockerClient,
 		Svc:          service,
 		Source:       source,

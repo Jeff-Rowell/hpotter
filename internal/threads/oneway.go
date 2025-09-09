@@ -81,15 +81,19 @@ func (oneway *OneWayThread) StartOneWayThread(wg *sync.WaitGroup) {
 			}
 
 			cred := parser.ParseCredentials(logData)
-			cred.ConnectionsID = oneway.DBConn.ID
-			if err := oneway.Database.Write(cred); err != nil {
-				log.Fatalf("error writing credential to database: %+v: %v", cred, err)
+			if cred != nil {
+				cred.ConnectionsID = oneway.DBConn.ID
+				if err := oneway.Database.Write(cred); err != nil {
+					log.Fatalf("error writing credential to database: %+v: %v", cred, err)
+				}
 			}
 
 			data := parser.ParseSessionData(logData)
-			data.ConnectionsID = oneway.DBConn.ID
-			if err := oneway.Database.Write(data); err != nil {
-				log.Fatalf("error writing session data to database: %+v: %v", data, err)
+			if data != nil {
+				data.ConnectionsID = oneway.DBConn.ID
+				if err := oneway.Database.Write(data); err != nil {
+					log.Fatalf("error writing session data to database: %+v: %v", data, err)
+				}
 			}
 		}
 	}()

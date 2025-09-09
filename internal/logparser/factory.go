@@ -1,8 +1,8 @@
 package logparser
 
 import (
-	"slices"
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/Jeff-Rowell/hpotter/types"
@@ -20,13 +20,15 @@ func (f *DefaultLogParserFactory) CreateParser(service types.Service) (LogParser
 		return NewSSHLogParser(service), nil
 	case "telnet":
 		return NewTelnetLogParser(service), nil
+	case "httpd":
+		return NewHttpdLogParser(service), nil
 	default:
 		return nil, fmt.Errorf("no log parser available for service: %s", service.ServiceName)
 	}
 }
 
 func (f *DefaultLogParserFactory) SupportedProtocols() []string {
-	return []string{"ssh", "telnet"}
+	return []string{"ssh", "telnet", "httpd"}
 }
 
 func (f *DefaultLogParserFactory) IsSupported(service types.Service) bool {
