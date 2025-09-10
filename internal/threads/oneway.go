@@ -97,21 +97,38 @@ func (oneway *OneWayThread) StartOneWayThread(wg *sync.WaitGroup) {
 			}
 		}
 	}()
-	for {
+
+	// Set up cancellation goroutine
+	cancelDone := make(chan struct{})
+	defer close(cancelDone)
+
+	go func() {
 		select {
 		case <-oneway.Container.Ctx.Done():
+			// Force close connections to unblock reads immediately
+			oneway.Source.Close()
+			oneway.Destination.Close()
+		case <-cancelDone:
 			return
-		default:
 		}
+	}()
+
+	for {
 		oneway.Source.SetReadDeadline(time.Now().Add(100 * time.Millisecond))
 
 		bytes := make([]byte, 4096)
 		numBytesRead, err := oneway.Source.Read(bytes)
 		if err != nil {
 			if netErr, ok := err.(net.Error); ok && netErr.Timeout() {
-				continue
+				// Check if we should exit due to cancellation
+				select {
+				case <-oneway.Container.Ctx.Done():
+					return
+				default:
+					continue
+				}
 			}
-			if err == io.EOF {
+			if err == io.EOF || isConnectionClosed(err) {
 				consecutiveEOFs++
 				// If we get multiple consecutive EOFs, the connection is likely closed
 				if consecutiveEOFs >= 2 {
