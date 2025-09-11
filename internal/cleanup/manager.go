@@ -3,6 +3,8 @@ package cleanup
 import (
 	"context"
 	"log"
+	"os"
+	"path/filepath"
 	"sync"
 	"time"
 
@@ -55,10 +57,11 @@ func (gcm *GlobalContainerManager) CleanupAllHPotterContainers() {
 	}
 
 	log.Printf("found %d HPotter containers to cleanup", len(containers))
-
 	for _, cont := range containers {
 		gcm.removeContainer(cont.ID, cont.Image)
 	}
+
+	gcm.cleanupTempConfigFiles()
 
 	gcm.dockerClient.Close()
 	log.Printf("HPotter container cleanup complete")
@@ -85,5 +88,30 @@ func (gcm *GlobalContainerManager) removeContainer(containerID, imageName string
 		log.Printf("error removing container %s: %v", containerID[:12], err)
 	} else {
 		log.Printf("successfully removed container %s", containerID[:12])
+	}
+}
+
+func (gcm *GlobalContainerManager) cleanupTempConfigFiles() {
+	tempDir := os.TempDir()
+	pattern := filepath.Join(tempDir, "httpd-*.conf")
+
+	matches, err := filepath.Glob(pattern)
+	if err != nil {
+		log.Printf("error finding temp config files: %v", err)
+		return
+	}
+
+	if len(matches) == 0 {
+		log.Printf("no temporary config files found to cleanup")
+		return
+	}
+
+	log.Printf("cleaning up %d temporary config files", len(matches))
+	for _, file := range matches {
+		if err := os.Remove(file); err != nil {
+			log.Printf("warning: failed to remove temporary config file %s: %v", file, err)
+		} else {
+			log.Printf("removed temporary config file: %s", file)
+		}
 	}
 }

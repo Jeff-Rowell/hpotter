@@ -6,9 +6,11 @@ import (
 	"io"
 	"log"
 	"net"
+	"os"
 	"path/filepath"
 	"strconv"
 	"sync"
+	"text/template"
 	"time"
 
 	"github.com/Jeff-Rowell/hpotter/internal/database"
@@ -72,6 +74,17 @@ func (c *Container) LaunchContainer() {
 		envVars = append(envVars, fmt.Sprintf("%s=%s", envVar.Key, envVar.Value))
 	}
 
+	var binds []string
+	if c.Svc.ServiceName == "httpd" {
+		configPath, err := c.renderHttpdConfig()
+		if err != nil {
+			log.Fatalf("error rendering httpd config: %v", err)
+		}
+
+		containerPath := "/usr/local/apache2/conf/httpd.conf"
+		binds = append(binds, fmt.Sprintf("%s:%s:ro", configPath, containerPath))
+	}
+
 	createdContainer, err := c.DockerClient.ContainerCreate(
 		c.Ctx,
 		&container.Config{
@@ -81,6 +94,7 @@ func (c *Container) LaunchContainer() {
 		},
 		&container.HostConfig{
 			PortBindings: portSet,
+			Binds:        binds,
 		},
 		nil,
 		nil,
@@ -163,4 +177,30 @@ func (c *Container) ReadLogs() (string, error) {
 	}
 
 	return string(logBytes), nil
+}
+
+func (c *Container) renderHttpdConfig() (string, error) {
+	wd, err := os.Getwd()
+	if err != nil {
+		return "", fmt.Errorf("error getting working directory: %v", err)
+	}
+
+	templatePath := filepath.Join(wd, "internal", "logparser", "httpd.conf.tmpl")
+	tmpl, err := template.ParseFiles(templatePath)
+	if err != nil {
+		return "", fmt.Errorf("error parsing template: %v", err)
+	}
+
+	tmpFile, err := os.CreateTemp(os.TempDir(), "httpd-*.conf")
+	if err != nil {
+		return "", fmt.Errorf("error creating temporary file: %v", err)
+	}
+	defer tmpFile.Close()
+
+	err = tmpl.Execute(tmpFile, c.Svc)
+	if err != nil {
+		return "", fmt.Errorf("error executing template: %v", err)
+	}
+
+	return tmpFile.Name(), nil
 }
