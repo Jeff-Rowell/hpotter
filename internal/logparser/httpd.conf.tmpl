@@ -68,7 +68,7 @@ LoadModule mpm_event_module modules/mod_mpm_event.so
 #LoadModule mpm_worker_module modules/mod_mpm_worker.so
 LoadModule authn_file_module modules/mod_authn_file.so
 #LoadModule authn_dbm_module modules/mod_authn_dbm.so
-#LoadModule authn_anon_module modules/mod_authn_anon.so
+LoadModule authn_anon_module modules/mod_authn_anon.so
 #LoadModule authn_dbd_module modules/mod_authn_dbd.so
 #LoadModule authn_socache_module modules/mod_authn_socache.so
 LoadModule authn_core_module modules/mod_authn_core.so
@@ -196,7 +196,7 @@ LoadModule dir_module modules/mod_dir.so
 #LoadModule speling_module modules/mod_speling.so
 #LoadModule userdir_module modules/mod_userdir.so
 LoadModule alias_module modules/mod_alias.so
-#LoadModule rewrite_module modules/mod_rewrite.so
+LoadModule rewrite_module modules/mod_rewrite.so
 
 <IfModule unixd_module>
 #
@@ -245,10 +245,10 @@ ServerAdmin you@example.com
 # explicitly permit access to web content directories in other 
 # <Directory> blocks below.
 #
-<Directory />
-    AllowOverride none
-    Require all denied
-</Directory>
+# <Directory />
+#     AllowOverride none
+#     Require all denied
+# </Directory>
 
 #
 # Note that from this point forward you must specifically allow
@@ -286,9 +286,23 @@ DocumentRoot "/usr/local/apache2/htdocs"
     AllowOverride None
 
     #
-    # Controls who can get stuff from this server.
+    # Capture Authorization header before authentication processing
     #
-    Require all granted
+    RewriteEngine On
+    RewriteCond %{HTTP:Authorization} ^(.+)
+    RewriteRule .* - [E=auth_header:%1]
+    
+    #
+    # Enable Basic Authentication for honeypot (accepts any credentials)
+    #
+    AuthType Basic
+    AuthName "Restricted Access"
+    AuthBasicProvider anon
+    Anonymous *
+    Anonymous_MustGiveEmail off
+    Anonymous_NoUserID off  
+    Anonymous_VerifyEmail off
+    Require valid-user
 </Directory>
 
 #
@@ -330,6 +344,7 @@ LogLevel warn
     #
     LogFormat "%h %l %u %t \"%r\" %>s %b \"%{Referer}i\" \"%{User-Agent}i\"" combined
     LogFormat "%h %l %u %t \"%r\" %>s %b" common
+    LogFormat "%h %l %u %t \"%r\" %>s %b \"AUTH: %{auth_header}e\"" auth_format
 
     <IfModule logio_module>
       # You need to enable mod_logio.c to use %I and %O
@@ -343,7 +358,7 @@ LogLevel warn
     # define per-<VirtualHost> access logfiles, transactions will be
     # logged therein and *not* in this file.
     #
-    CustomLog /proc/self/fd/1 common
+    CustomLog /proc/self/fd/1 auth_format
 
     #
     # If you prefer a logfile with access, agent, and referer information
