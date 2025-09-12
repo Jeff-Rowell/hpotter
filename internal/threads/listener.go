@@ -22,7 +22,6 @@ import (
 func StartListener(service types.Service, wg *sync.WaitGroup, ctx context.Context, db *database.Database) {
 	defer wg.Done()
 	lowerProto := strings.ToLower(service.ListenProto)
-	log.Printf("starting listener on %s port %d", lowerProto, service.ListenPort)
 
 	var err error
 	var listenSocket net.Listener
@@ -35,7 +34,7 @@ func StartListener(service types.Service, wg *sync.WaitGroup, ctx context.Contex
 		log.Fatalf("error creating listener on %s %d/%s: %v", service.ListenAddress, service.ListenPort, service.ListenProto, err)
 	}
 	defer listenSocket.Close()
-	log.Printf("created socket listener on %s", service.ListenAddress)
+	log.Printf("created socket listener on %s:%d/%s", service.ListenAddress, service.ListenPort, service.ListenProto)
 
 	if err != nil {
 		log.Fatalf("error: failed to create listener: %v", err)
