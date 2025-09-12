@@ -1,7 +1,6 @@
 package logparser
 
 import (
-	"log"
 	"regexp"
 	"strings"
 
@@ -17,19 +16,9 @@ type SSHLogParser struct {
 
 func NewSSHLogParser(service types.Service) *SSHLogParser {
 	parser := &SSHLogParser{
-		service: service,
-	}
-
-	if service.CredentialLogPattern != "" {
-		parser.credentialRegex = regexp.MustCompile(service.CredentialLogPattern)
-	} else {
-		log.Fatalf("error: 'credential_log_pattern' is required.")
-	}
-
-	if service.SessionDataLogPattern != "" {
-		parser.sessionDataRegex = regexp.MustCompile(service.SessionDataLogPattern)
-	} else {
-		log.Fatalf("error: 'session_data_log_pattern' is required.")
+		service:          service,
+		credentialRegex:  regexp.MustCompile(`login attempt \[b'(.*?)'/b'(.*?)'\] succeeded`),
+		sessionDataRegex: regexp.MustCompile("Command found: (.*?)\n"),
 	}
 
 	return parser

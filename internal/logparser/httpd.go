@@ -17,19 +17,9 @@ type HTTPDLogParser struct {
 
 func NewHttpdLogParser(service types.Service) *HTTPDLogParser {
 	parser := &HTTPDLogParser{
-		service: service,
-	}
-
-	if service.CredentialLogPattern != "" {
-		parser.credentialRegex = regexp.MustCompile(service.CredentialLogPattern)
-	} else {
-		log.Fatalf("error: 'credential_log_pattern' is required.")
-	}
-
-	if service.SessionDataLogPattern != "" {
-		parser.sessionDataRegex = regexp.MustCompile(service.SessionDataLogPattern)
-	} else {
-		log.Fatalf("error: 'session_data_log_pattern' is required.")
+		service:          service,
+		credentialRegex:  regexp.MustCompile(``),
+		sessionDataRegex: regexp.MustCompile(`(\d{1,3}\.){3}\d{1,3} - (.*)`),
 	}
 
 	return parser
@@ -41,10 +31,6 @@ func (p *HTTPDLogParser) ParseCredentials(allLogData string) *database.Credentia
 }
 
 func (p *HTTPDLogParser) ParseSessionData(allLogData string) *database.Data {
-	if p.sessionDataRegex == nil {
-		return nil
-	}
-
 	var sessionData []string
 	matches := p.sessionDataRegex.FindAllString(allLogData, -1)
 

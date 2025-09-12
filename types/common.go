@@ -6,16 +6,14 @@ type EnvVar struct {
 }
 
 type Service struct {
-	ImageName             string   `json:"image_name"`
-	ListenAddress         string   `json:"listen_address"`
-	ListenPort            int      `json:"listen_port"`
-	ListenProto           string   `json:"listen_proto"`
-	RequestSave           bool     `json:"request_save"`
-	EnvVars               []EnvVar `json:"envvars,omitempty"`
-	ServiceName           string   `json:"service_name"`
-	CollectCredentials    bool     `json:"collect_credentials"`
-	CredentialLogPattern  string   `json:"credential_log_pattern,omitempty"`
-	SessionDataLogPattern string   `json:"session_data_log_pattern,omitempty"`
+	ImageName          string   `json:"image_name"`
+	ListenAddress      string   `json:"listen_address"`
+	ListenPort         int      `json:"listen_port"`
+	ListenProto        string   `json:"listen_proto"`
+	RequestSave        bool     `json:"request_save"`
+	EnvVars            []EnvVar `json:"envvars,omitempty"`
+	ServiceName        string   `json:"service_name"`
+	CollectCredentials bool     `json:"collect_credentials"`
 }
 
 type DBConfig struct {
