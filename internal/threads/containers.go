@@ -41,7 +41,7 @@ func NewContainerThread(service types.Service, source net.Conn, ctx context.Cont
 		"hpotter": "container",
 	}
 	return Container{
-		Ctx:          context.Background(),
+		Ctx:          ctx,
 		DockerClient: dockerClient,
 		Svc:          service,
 		Source:       source,
@@ -165,7 +165,8 @@ func (c *Container) ReadLogs() (string, error) {
 		Timestamps: false,
 	}
 
-	logReader, err := c.DockerClient.ContainerLogs(c.Ctx, c.CreateResponse.ID, options)
+	// Use background context for log reading to avoid cancellation during cleanup
+	logReader, err := c.DockerClient.ContainerLogs(context.Background(), c.CreateResponse.ID, options)
 	if err != nil {
 		return "", fmt.Errorf("error reading container logs: %v", err)
 	}
