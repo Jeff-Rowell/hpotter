@@ -24,28 +24,36 @@ HPotter is a honney pot implementation that creates disposible containers upon e
   "services": [
     {
       "image_name": "cowrie/cowrie:latest",
-      "service_name": "ssh",
-      "listen_port": 2222,
-      "listen_proto": "tcp",
-      "request_save": true,
-      "response_save": true,
-      "collect_credentials": true,
-      "socket_timeout": 10
-    },
-    {
-      "image_name": "cowrie/cowrie:latest",
+      "service_name": "telnet",
       "listen_port": 2223,
       "listen_proto": "tcp",
       "request_save": true,
-      "response_save": true,
       "socket_timeout": 10,
-      "collect_credentials": true,
+      "collect_credentials": false,
       "envvars": [
         {
           "key": "COWRIE_TELNET_ENABLED",
           "value": "yes"
         }
       ]
+    },
+    {
+      "image_name": "cowrie/cowrie:latest",
+      "service_name": "ssh",
+      "listen_port": 2222,
+      "listen_proto": "tcp",
+      "request_save": true,
+      "socket_timeout": 10,
+      "collect_credentials": false
+    },
+    {
+      "image_name": "httpd:2.4.65",
+      "service_name": "httpd",
+      "listen_port": 8080,
+      "listen_proto": "tcp",
+      "request_save": true,
+      "socket_timeout": 10,
+      "collect_credentials": false
     }
   ],
   "db_config": {
