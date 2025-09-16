@@ -182,6 +182,10 @@ func handleCredentialCollection(service types.Service, conn net.Conn, _ context.
 		return
 	}
 
-	log.Printf("successfully collected credentials: user=%s, connection_id=%d", creds.Username, creds.ConnectionsID)
+	if creds != nil {
+		log.Printf("successfully collected credentials: user=%s, connection_id=%d", creds.Username, creds.ConnectionsID)
+	} else {
+		return
+	}
 	log.Printf("credential collection complete for connection from %s", conn.RemoteAddr())
 }

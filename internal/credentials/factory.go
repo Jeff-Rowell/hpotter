@@ -21,6 +21,8 @@ func NewCredentialCollector(service types.Service, conn net.Conn, db *database.D
 		return NewTelnetCredentialCollector(conn, db, dbConn), nil
 	case strings.EqualFold(service.ServiceName, "ssh"):
 		return NewSSHCredentialCollector(conn, db, dbConn)
+	case strings.EqualFold(service.ServiceName, "httpd"):
+		return NewHTTPDCredentialCollector(conn, db, dbConn), nil
 	default:
 		return nil, fmt.Errorf("no credential collector available for service on port %d", service.ListenPort)
 	}
