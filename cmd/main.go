@@ -17,7 +17,7 @@ import (
 )
 
 type flags struct {
-	configJson string
+	configFile string
 }
 
 func main() {
@@ -35,7 +35,7 @@ func main() {
 
 	flags := parseFlags()
 	config := configparser.NewParser()
-	config.Parse(flags.configJson)
+	config.Parse(flags.configFile)
 
 	dbContainer, err := database.NewDatabaseContainer(ctx, config.DBConfig)
 	if err != nil {
@@ -77,9 +77,9 @@ func main() {
 }
 
 func parseFlags() flags {
-	configJson := flag.String("config", "config.json", "the absolute or relative path to json config")
+	configFile := flag.String("config", "config.yaml", "the absolute or relative path to yaml config")
 	flag.Parse()
 	return flags{
-		configJson: *configJson,
+		configFile: *configFile,
 	}
 }

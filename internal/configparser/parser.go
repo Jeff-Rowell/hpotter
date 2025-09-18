@@ -1,35 +1,36 @@
 package configparser
 
 import (
-	"encoding/json"
 	"log"
 	"os"
 	"path/filepath"
+
+	"gopkg.in/yaml.v3"
 
 	"github.com/Jeff-Rowell/hpotter/internal/services"
 	"github.com/Jeff-Rowell/hpotter/types"
 )
 
 type Parser struct {
-	DBConfig types.DBConfig  `json:"db_config"`
-	Services []types.Service `json:"services"`
+	DBConfig types.DBConfig  `yaml:"db_config"`
+	Services []types.Service `yaml:"services"`
 }
 
 func NewParser() Parser {
 	return Parser{}
 }
 
-func (p *Parser) Parse(configJson string) {
-	cleanConfigJson := filepath.Clean(configJson)
-	log.Printf("creating new parser from '%s'", cleanConfigJson)
-	data, err := os.ReadFile(cleanConfigJson)
+func (p *Parser) Parse(configFile string) {
+	cleanConfigFile := filepath.Clean(configFile)
+	log.Printf("creating new parser from '%s'", cleanConfigFile)
+	data, err := os.ReadFile(cleanConfigFile)
 	if err != nil {
-		log.Fatalf("error: failed to read data from file '%s': %v", cleanConfigJson, err)
+		log.Fatalf("error: failed to read data from file '%s': %v", cleanConfigFile, err)
 	}
 
-	if err := json.Unmarshal(data, &p); err != nil {
+	if err := yaml.Unmarshal(data, &p); err != nil {
 		log.Println(err)
-		log.Fatalf("error: failed to unmarshal data from file '%s': %v", cleanConfigJson, err)
+		log.Fatalf("error: failed to unmarshal data from file '%s': %v", cleanConfigFile, err)
 	}
 
 	serviceRegistry := services.NewServiceRegistry()
