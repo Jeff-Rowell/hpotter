@@ -14,6 +14,9 @@ type Service struct {
 	EnvVars            []EnvVar `yaml:"envvars,omitempty"`
 	ServiceName        string   `yaml:"service_name"`
 	CollectCredentials bool     `yaml:"collect_credentials"`
+	UseTLS             bool     `yaml:"use_tls,omitempty"`
+	CertificatePath    string   `yaml:"certificate_path,omitempty"`
+	KeyPath            string   `yaml:"key_path,omitempty"`
 }
 
 type DBConfig struct {

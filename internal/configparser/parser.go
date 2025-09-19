@@ -44,5 +44,21 @@ func (p *Parser) Parse(configFile string) {
 				log.Fatalf("error: service '%s' listening on '%d/%s' is not supported for credential collection: %s", svc.ServiceName, svc.ListenPort, svc.ListenProto, serviceRegistry.GetSupportedServicesString())
 			}
 		}
+
+		// Validate TLS options
+		if svc.UseTLS || svc.CertificatePath != "" || svc.KeyPath != "" {
+			if svc.ServiceName != "httpd" {
+				log.Fatalf("error: TLS options (use_tls, certificate_path, key_path) are only allowed for httpd service, found in service '%s'", svc.ServiceName)
+			}
+			
+			if svc.UseTLS {
+				if svc.CertificatePath == "" {
+					log.Fatalf("error: certificate_path is required when use_tls is true for service '%s'", svc.ServiceName)
+				}
+				if svc.KeyPath == "" {
+					log.Fatalf("error: key_path is required when use_tls is true for service '%s'", svc.ServiceName)
+				}
+			}
+		}
 	}
 }
