@@ -14,55 +14,30 @@
 </body>
 </html>
 
-HPotter is a honney pot implementation that creates disposible containers upon each connection to the pot. The associated payloads sent to the honeypot are optionally stored to a local database for further inspection and analysis. Request and response data saving can be optionally turned on/off. So if you're only interested in keeping the request data, you can turn off the response data storage option. Additionally, the honey pot is configurable to run multiple services and protocols by specifying the container image to run in a `config.json` file as shown below:
+HPotter is a honney pot implementation that creates disposible containers upon each connection to the pot. The associated payloads sent to the honeypot are optionally stored to a local database for further inspection and analysis. Request and response data saving can be optionally turned on/off. So if you're only interested in keeping the request data, you can turn off the response data storage option. Additionally, the honey pot is configurable to run multiple services and protocols by specifying the container image to run in a `config.yaml` file as shown below:
 
 <details>
   <summary>Click to expand example config...</summary>
 
-```json
-{
-  "services": [
-    {
-      "image_name": "cowrie/cowrie:latest",
-      "service_name": "telnet",
-      "listen_port": 2223,
-      "listen_proto": "tcp",
-      "request_save": true,
-      "socket_timeout": 10,
-      "collect_credentials": false,
-      "envvars": [
-        {
-          "key": "COWRIE_TELNET_ENABLED",
-          "value": "yes"
-        }
-      ]
-    },
-    {
-      "image_name": "cowrie/cowrie:latest",
-      "service_name": "ssh",
-      "listen_port": 2222,
-      "listen_proto": "tcp",
-      "request_save": true,
-      "socket_timeout": 10,
-      "collect_credentials": false
-    },
-    {
-      "image_name": "httpd:2.4.65",
-      "service_name": "httpd",
-      "listen_port": 8080,
-      "listen_proto": "tcp",
-      "request_save": true,
-      "socket_timeout": 10,
-      "collect_credentials": false
-    }
-  ],
-  "db_config": {
-    "db_type": "postgres",
-    "user": "",
-    "password": "",
-    "image_name": "postgres:17.6"
-  }
-}
+```yaml
+services:
+  - image_name: "httpd:2.4.65"
+    service_name: "httpd"
+    listen_port: 8080
+    listen_proto: "tcp"
+    request_save: true
+    socket_timeout: 10
+    collect_credentials: true
+    # TLS options (optional, only for httpd service)
+    # use_tls: true
+    # certificate_path: "/path/to/certificate.crt"
+    # key_path: "/path/to/private.key"
+
+db_config:
+  db_type: "postgres"
+  user: ""
+  password: ""
+  image_name: "postgres:17.6"
 ```
 
 </details>
