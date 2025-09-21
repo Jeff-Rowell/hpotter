@@ -17,6 +17,7 @@ type Service struct {
 	UseTLS             bool     `yaml:"use_tls,omitempty"`
 	CertificatePath    string   `yaml:"certificate_path,omitempty"`
 	KeyPath            string   `yaml:"key_path,omitempty"`
+	GenerateCerts      bool     `yaml:"generate_certs,omitempty"`
 }
 
 type DBConfig struct {

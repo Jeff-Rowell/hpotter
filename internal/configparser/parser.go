@@ -46,18 +46,28 @@ func (p *Parser) Parse(configFile string) {
 		}
 
 		// Validate TLS options
-		if svc.UseTLS || svc.CertificatePath != "" || svc.KeyPath != "" {
+		if svc.UseTLS || svc.CertificatePath != "" || svc.KeyPath != "" || svc.GenerateCerts {
 			if svc.ServiceName != "httpd" {
-				log.Fatalf("error: TLS options (use_tls, certificate_path, key_path) are only allowed for httpd service, found in service '%s'", svc.ServiceName)
+				log.Fatalf("error: TLS options (use_tls, certificate_path, key_path, generate_certs) are only allowed for httpd service, found in service '%s'", svc.ServiceName)
 			}
-			
+
 			if svc.UseTLS {
-				if svc.CertificatePath == "" {
-					log.Fatalf("error: certificate_path is required when use_tls is true for service '%s'", svc.ServiceName)
+				if svc.GenerateCerts {
+					if svc.CertificatePath != "" || svc.KeyPath != "" {
+						log.Fatalf("error: certificate_path and key_path should not be set when generate_certs is true for service '%s'", svc.ServiceName)
+					}
+				} else {
+					if svc.CertificatePath == "" {
+						log.Fatalf("error: certificate_path is required when use_tls is true and generate_certs is false for service '%s'", svc.ServiceName)
+					}
+					if svc.KeyPath == "" {
+						log.Fatalf("error: key_path is required when use_tls is true and generate_certs is false for service '%s'", svc.ServiceName)
+					}
 				}
-				if svc.KeyPath == "" {
-					log.Fatalf("error: key_path is required when use_tls is true for service '%s'", svc.ServiceName)
-				}
+			}
+
+			if svc.GenerateCerts && !svc.UseTLS {
+				log.Fatalf("error: generate_certs can only be true when use_tls is also true for service '%s'", svc.ServiceName)
 			}
 		}
 	}

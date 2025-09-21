@@ -13,6 +13,7 @@ import (
 	"text/template"
 	"time"
 
+	"github.com/Jeff-Rowell/hpotter/internal/certs"
 	"github.com/Jeff-Rowell/hpotter/internal/database"
 	"github.com/Jeff-Rowell/hpotter/types"
 	"github.com/docker/go-connections/nat"
@@ -21,15 +22,17 @@ import (
 )
 
 type Container struct {
-	CreateResponse container.CreateResponse
-	ContainerIP    string
-	ContainerProto string
-	Source         net.Conn
-	Destination    net.Conn
-	Svc            types.Service
-	Ctx            context.Context
-	DockerClient   *client.Client
-	Labels         map[string]string
+	CreateResponse    container.CreateResponse
+	ContainerIP       string
+	ContainerProto    string
+	Source            net.Conn
+	Destination       net.Conn
+	Svc               types.Service
+	Ctx               context.Context
+	DockerClient      *client.Client
+	Labels            map[string]string
+	GeneratedCertPath string
+	GeneratedKeyPath  string
 }
 
 func NewContainerThread(service types.Service, source net.Conn, ctx context.Context) Container {
@@ -86,11 +89,33 @@ func (c *Container) LaunchContainer() {
 
 		// Mount TLS certificate and key files if TLS is enabled
 		if c.Svc.UseTLS {
-			if c.Svc.CertificatePath != "" {
-				binds = append(binds, fmt.Sprintf("%s:/usr/local/apache2/conf/server.crt:ro", c.Svc.CertificatePath))
+			var certPath, keyPath string
+
+			if c.Svc.GenerateCerts {
+				certPaths, err := certs.GenerateSelfSignedCert()
+				if err != nil {
+					log.Fatalf("error generating self-signed certificates: %v", err)
+				}
+
+				certPath = certPaths.CertPath
+				keyPath = certPaths.KeyPath
+
+				// Store paths for cleanup
+				c.GeneratedCertPath = certPath
+				c.GeneratedKeyPath = keyPath
+
+				log.Printf("generated self-signed certificate: %s", certPath)
+				log.Printf("generated self-signed key: %s", keyPath)
+			} else {
+				certPath = c.Svc.CertificatePath
+				keyPath = c.Svc.KeyPath
 			}
-			if c.Svc.KeyPath != "" {
-				binds = append(binds, fmt.Sprintf("%s:/usr/local/apache2/conf/server.key:ro", c.Svc.KeyPath))
+
+			if certPath != "" {
+				binds = append(binds, fmt.Sprintf("%s:/usr/local/apache2/conf/server.crt:ro", certPath))
+			}
+			if keyPath != "" {
+				binds = append(binds, fmt.Sprintf("%s:/usr/local/apache2/conf/server.key:ro", keyPath))
 			}
 		}
 	}
@@ -214,4 +239,11 @@ func (c *Container) renderHttpdConfig() (string, error) {
 	}
 
 	return tmpFile.Name(), nil
+}
+
+func (c *Container) CleanupGeneratedCerts() {
+	if c.GeneratedCertPath != "" || c.GeneratedKeyPath != "" {
+		log.Printf("cleaning up generated certificates for container %s", c.CreateResponse.ID)
+		certs.CleanupCertificateFiles(c.GeneratedCertPath, c.GeneratedKeyPath)
+	}
 }
