@@ -83,6 +83,16 @@ func (c *Container) LaunchContainer() {
 
 		containerPath := "/usr/local/apache2/conf/httpd.conf"
 		binds = append(binds, fmt.Sprintf("%s:%s:ro", configPath, containerPath))
+
+		// Mount TLS certificate and key files if TLS is enabled
+		if c.Svc.UseTLS {
+			if c.Svc.CertificatePath != "" {
+				binds = append(binds, fmt.Sprintf("%s:/usr/local/apache2/conf/server.crt:ro", c.Svc.CertificatePath))
+			}
+			if c.Svc.KeyPath != "" {
+				binds = append(binds, fmt.Sprintf("%s:/usr/local/apache2/conf/server.key:ro", c.Svc.KeyPath))
+			}
+		}
 	}
 
 	createdContainer, err := c.DockerClient.ContainerCreate(
