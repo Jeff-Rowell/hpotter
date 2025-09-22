@@ -93,25 +93,57 @@ func (gcm *GlobalContainerManager) removeContainer(containerID, imageName string
 
 func (gcm *GlobalContainerManager) cleanupTempConfigFiles() {
 	tempDir := os.TempDir()
-	pattern := filepath.Join(tempDir, "httpd-*.conf")
-
-	matches, err := filepath.Glob(pattern)
+	
+	// Clean up httpd config files
+	configPattern := filepath.Join(tempDir, "httpd-*.conf")
+	configMatches, err := filepath.Glob(configPattern)
 	if err != nil {
 		log.Printf("error finding temp config files: %v", err)
-		return
-	}
-
-	if len(matches) == 0 {
-		log.Printf("no temporary config files found to cleanup")
-		return
-	}
-
-	log.Printf("cleaning up %d temporary config files", len(matches))
-	for _, file := range matches {
-		if err := os.Remove(file); err != nil {
-			log.Printf("warning: failed to remove temporary config file %s: %v", file, err)
-		} else {
-			log.Printf("removed temporary config file: %s", file)
+	} else if len(configMatches) > 0 {
+		log.Printf("cleaning up %d temporary config files", len(configMatches))
+		for _, file := range configMatches {
+			if err := os.Remove(file); err != nil {
+				log.Printf("warning: failed to remove temporary config file %s: %v", file, err)
+			} else {
+				log.Printf("removed temporary config file: %s", file)
+			}
 		}
+	}
+	
+	// Clean up generated certificate files
+	certPattern := filepath.Join(tempDir, "hpotter-cert-*.crt")
+	certMatches, err := filepath.Glob(certPattern)
+	if err != nil {
+		log.Printf("error finding temp certificate files: %v", err)
+	} else if len(certMatches) > 0 {
+		log.Printf("cleaning up %d temporary certificate files", len(certMatches))
+		for _, file := range certMatches {
+			if err := os.Remove(file); err != nil {
+				log.Printf("warning: failed to remove temporary certificate file %s: %v", file, err)
+			} else {
+				log.Printf("removed temporary certificate file: %s", file)
+			}
+		}
+	}
+	
+	// Clean up generated key files
+	keyPattern := filepath.Join(tempDir, "hpotter-key-*.key")
+	keyMatches, err := filepath.Glob(keyPattern)
+	if err != nil {
+		log.Printf("error finding temp key files: %v", err)
+	} else if len(keyMatches) > 0 {
+		log.Printf("cleaning up %d temporary key files", len(keyMatches))
+		for _, file := range keyMatches {
+			if err := os.Remove(file); err != nil {
+				log.Printf("warning: failed to remove temporary key file %s: %v", file, err)
+			} else {
+				log.Printf("removed temporary key file: %s", file)
+			}
+		}
+	}
+	
+	totalFiles := len(configMatches) + len(certMatches) + len(keyMatches)
+	if totalFiles == 0 {
+		log.Printf("no temporary files found to cleanup")
 	}
 }

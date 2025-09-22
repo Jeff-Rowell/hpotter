@@ -79,6 +79,8 @@ func StartListener(service types.Service, wg *sync.WaitGroup, ctx context.Contex
 }
 
 func handleConnection(containerThread Container, wg *sync.WaitGroup, db *database.Database, dbConn *database.Connections) {
+	defer containerThread.CleanupGeneratedCerts()
+	
 	containerThread.LaunchContainer()
 	containerThread.Connect()
 	containerThread.Communicate(wg, db, dbConn)
