@@ -30,9 +30,28 @@ services:
     collect_credentials: true
     # TLS options (optional, only for httpd service)
     # use_tls: true
+    # Option 1: Use existing certificates
     # certificate_path: "/path/to/certificate.crt"
     # key_path: "/path/to/private.key"
-
+    # Option 2: Generate self-signed certificates automatically
+    # generate_certs: true
+  - image_name: "cowrie/cowrie:latest"
+    service_name: "ssh"
+    listen_port: 2222
+    listen_proto: "tcp"
+    request_save: true
+    socket_timeout: 10
+    collect_credentials: false
+  - image_name: "cowrie/cowrie:latest"
+    service_name: "telnet"
+    listen_port: 2223
+    listen_proto: "tcp"
+    request_save: true
+    socket_timeout: 10
+    collect_credentials: false
+    envvars:
+      - key: "COWRIE_TELNET_ENABLED"
+        value: "yes"
 db_config:
   db_type: "postgres"
   user: ""
