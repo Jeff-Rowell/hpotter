@@ -35,7 +35,8 @@ func (p *Parser) Parse(configFile string) {
 
 	serviceRegistry := services.NewServiceRegistry()
 
-	for _, svc := range p.Services {
+	for i := range p.Services {
+		svc := &p.Services[i]
 		if svc.CollectCredentials {
 			if svc.ServiceName == "" {
 				log.Fatalf("error: service_name is required")
@@ -43,6 +44,14 @@ func (p *Parser) Parse(configFile string) {
 			if !serviceRegistry.IsSupported(svc.ServiceName) {
 				log.Fatalf("error: service '%s' listening on '%d/%s' is not supported for credential collection: %s", svc.ServiceName, svc.ListenPort, svc.ListenProto, serviceRegistry.GetSupportedServicesString())
 			}
+		}
+
+		if svc.CommandLimit > 0 {
+			if svc.ServiceName != "ssh" && svc.ServiceName != "telnet" {
+				log.Fatalf("error: command_limit is only allowed for ssh or telnet services, found in service '%s'", svc.ServiceName)
+			}
+		} else if svc.ServiceName == "ssh" || svc.ServiceName == "telnet" {
+			svc.CommandLimit = 10
 		}
 
 		// Validate TLS options

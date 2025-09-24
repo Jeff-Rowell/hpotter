@@ -18,6 +18,7 @@ type Service struct {
 	CertificatePath    string   `yaml:"certificate_path,omitempty"`
 	KeyPath            string   `yaml:"key_path,omitempty"`
 	GenerateCerts      bool     `yaml:"generate_certs,omitempty"`
+	CommandLimit       int      `yaml:"command_limit,omitempty"`
 }
 
 type DBConfig struct {
