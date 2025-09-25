@@ -48,6 +48,7 @@ func (oneway *OneWayThread) StartOneWayThread(wg *sync.WaitGroup) {
 	defer wg.Done()
 	var totalData []byte
 	var consecutiveEOFs int
+	var commandCount int
 
 	defer func() {
 		log.Printf("terminating oneway '%s' thread...", oneway.Direction)
@@ -143,6 +144,20 @@ func (oneway *OneWayThread) StartOneWayThread(wg *sync.WaitGroup) {
 		}
 		consecutiveEOFs = 0
 		totalData = append(totalData, bytes[:numBytesRead]...)
+
+		// Check command limit for SSH/telnet services on request direction
+		if oneway.Direction == "request" && (oneway.Container.Svc.ServiceName == "ssh" || oneway.Container.Svc.ServiceName == "telnet") {
+			// Count commands (look for newlines in the data)
+			for _, b := range bytes[:numBytesRead] {
+				if b == '\n' {
+					commandCount++
+					if commandCount >= oneway.Container.Svc.CommandLimit {
+						log.Printf("command limit (%d) reached for %s service, terminating connection", oneway.Container.Svc.CommandLimit, oneway.Container.Svc.ServiceName)
+						return
+					}
+				}
+			}
+		}
 
 		oneway.Destination.SetWriteDeadline(time.Now().Add(1 * time.Second))
 		_, err = oneway.Destination.Write(bytes[:numBytesRead])
