@@ -63,11 +63,13 @@ func StartListener(service types.Service, wg *sync.WaitGroup, ctx context.Contex
 			log.Printf("connection received: (src=%s, dst=%s, proto=%s)", conn.RemoteAddr(), conn.LocalAddr(), conn.LocalAddr().Network())
 
 			dbConn := buildConnection(service.ImageName, conn)
-			go writeConnection(dbConn, db)
 
 			if service.CollectCredentials {
+				// Write connection first to ensure ID is available for credential foreign key
+				writeConnection(dbConn, db)
 				go handleCredentialCollection(service, conn, ctx, wg, db, dbConn)
 			} else {
+				go writeConnection(dbConn, db)
 				containerThread := NewContainerThread(service, conn, ctx)
 				go handleConnection(containerThread, wg, db, dbConn)
 			}
