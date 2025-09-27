@@ -21,8 +21,7 @@ HPotter is a honney pot implementation that creates disposible containers upon e
 
 ```yaml
 services:
-  - image_name: "httpd:2.4.65"
-    service_name: "httpd"
+  - service_name: "httpd"
     listen_port: 8080
     listen_proto: "tcp"
     request_save: true
@@ -35,15 +34,13 @@ services:
     # key_path: "/path/to/private.key"
     # Option 2: Generate self-signed certificates automatically
     # generate_certs: true
-  - image_name: "cowrie/cowrie:latest"
-    service_name: "ssh"
+  - service_name: "ssh"
     listen_port: 2222
     listen_proto: "tcp"
     request_save: true
     socket_timeout: 10
     collect_credentials: false
-  - image_name: "cowrie/cowrie:latest"
-    service_name: "telnet"
+  - service_name: "telnet"
     listen_port: 2223
     listen_proto: "tcp"
     request_save: true
@@ -56,7 +53,6 @@ db_config:
   db_type: "postgres"
   user: ""
   password: ""
-  image_name: "postgres:17.6"
 ```
 
 </details>

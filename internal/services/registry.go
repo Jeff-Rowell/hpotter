@@ -12,20 +12,24 @@ type CredentialService struct {
 	Protocol    string
 	Port        int
 	Description string
+	ImageName   string
 }
 
 var SupportedServices = []CredentialService{
 	{
 		Name:        "telnet",
 		Description: "Telnet service with username/password collection",
+		ImageName:   "cowrie/cowrie:latest",
 	},
 	{
 		Name:        "ssh",
 		Description: "SSH service with username/password collection",
+		ImageName:   "cowrie/cowrie:latest",
 	},
 	{
 		Name:        "httpd",
 		Description: "HTTPd service with username/password collection",
+		ImageName:   "httpd:2.4.65",
 	},
 }
 
@@ -59,3 +63,13 @@ func (sr *ServiceRegistry) GetSupportedServicesString() string {
 	}
 	return output
 }
+
+func (sr *ServiceRegistry) GetImageName(serviceName string) string {
+	service, found := sr.FindService(serviceName)
+	if found {
+		return service.ImageName
+	}
+	return ""
+}
+
+const DefaultDBImageName = "postgres:17.6"

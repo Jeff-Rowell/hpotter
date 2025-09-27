@@ -16,6 +16,7 @@ import (
 
 	"github.com/Jeff-Rowell/hpotter/internal/credentials"
 	"github.com/Jeff-Rowell/hpotter/internal/database"
+	"github.com/Jeff-Rowell/hpotter/internal/services"
 	"github.com/Jeff-Rowell/hpotter/types"
 )
 
@@ -62,7 +63,9 @@ func StartListener(service types.Service, wg *sync.WaitGroup, ctx context.Contex
 		case conn := <-connChan:
 			log.Printf("connection received: (src=%s, dst=%s, proto=%s)", conn.RemoteAddr(), conn.LocalAddr(), conn.LocalAddr().Network())
 
-			dbConn := buildConnection(service.ImageName, conn)
+			serviceRegistry := services.NewServiceRegistry()
+			imageName := serviceRegistry.GetImageName(service.ServiceName)
+			dbConn := buildConnection(imageName, conn)
 
 			if service.CollectCredentials {
 				// Write connection first to ensure ID is available for credential foreign key

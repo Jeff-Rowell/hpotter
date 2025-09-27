@@ -15,6 +15,7 @@ import (
 
 	"github.com/Jeff-Rowell/hpotter/internal/certs"
 	"github.com/Jeff-Rowell/hpotter/internal/database"
+	"github.com/Jeff-Rowell/hpotter/internal/services"
 	"github.com/Jeff-Rowell/hpotter/types"
 	"github.com/docker/go-connections/nat"
 	"github.com/moby/moby/api/types/container"
@@ -53,7 +54,9 @@ func NewContainerThread(service types.Service, source net.Conn, ctx context.Cont
 }
 
 func (c *Container) LaunchContainer() {
-	log.Printf("creating container: %s", filepath.Clean(c.Svc.ImageName))
+	serviceRegistry := services.NewServiceRegistry()
+	imageName := serviceRegistry.GetImageName(c.Svc.ServiceName)
+	log.Printf("creating container: %s", filepath.Clean(imageName))
 	port, err := nat.NewPort(c.Svc.ListenProto, strconv.Itoa(c.Svc.ListenPort))
 	if err != nil {
 		log.Fatalf("error creating nat port %d/%s: %v", c.Svc.ListenPort, c.Svc.ListenProto, err)
@@ -123,7 +126,7 @@ func (c *Container) LaunchContainer() {
 	createdContainer, err := c.DockerClient.ContainerCreate(
 		c.Ctx,
 		&container.Config{
-			Image:  c.Svc.ImageName,
+			Image:  imageName,
 			Labels: c.Labels,
 			Env:    envVars,
 		},
@@ -135,24 +138,26 @@ func (c *Container) LaunchContainer() {
 		nil,
 		"")
 	if err != nil {
-		log.Fatalf("error creating container using image '%s': %v", c.Svc.ImageName, err)
+		log.Fatalf("error creating container using image '%s': %v", imageName, err)
 	}
 
 	log.Printf("create container response: %+v", createdContainer)
 	c.CreateResponse = createdContainer
 
-	log.Printf("starting container: %s", filepath.Clean(c.Svc.ImageName))
+	log.Printf("starting container: %s", filepath.Clean(imageName))
 	err = c.DockerClient.ContainerStart(c.Ctx, c.CreateResponse.ID, container.StartOptions{})
 	if err != nil {
-		log.Fatalf("error: failed to start container %s running image %s: %v", c.CreateResponse.ID, c.Svc.ImageName, err)
+		log.Fatalf("error: failed to start container %s running image %s: %v", c.CreateResponse.ID, imageName, err)
 	}
 }
 
 func (c *Container) Connect() {
-	log.Printf("connecting to container %s running image %s", c.CreateResponse.ID, c.Svc.ImageName)
+	serviceRegistry := services.NewServiceRegistry()
+	imageName := serviceRegistry.GetImageName(c.Svc.ServiceName)
+	log.Printf("connecting to container %s running image %s", c.CreateResponse.ID, imageName)
 	inspectResponse, err := c.DockerClient.ContainerInspect(c.Ctx, c.CreateResponse.ID)
 	if err != nil {
-		log.Fatalf("error inspecting container %s running image %s", c.CreateResponse.ID, c.Svc.ImageName)
+		log.Fatalf("error inspecting container %s running image %s", c.CreateResponse.ID, imageName)
 	}
 	c.ContainerIP = inspectResponse.NetworkSettings.Networks["bridge"].IPAddress
 
@@ -180,7 +185,7 @@ func (c *Container) Connect() {
 	if len(errSlice) == 10 {
 		log.Fatalf("error attempting connection 10 times: %v\n", errSlice)
 	}
-	log.Printf("successfully connected to container %s running image %s on %s", c.CreateResponse.ID, c.Svc.ImageName, c.ContainerIP)
+	log.Printf("successfully connected to container %s running image %s on %s", c.CreateResponse.ID, imageName, c.ContainerIP)
 }
 
 func (c *Container) Communicate(wg *sync.WaitGroup, db *database.Database, dbConn *database.Connections) {

@@ -8,6 +8,7 @@ import (
 	"strconv"
 	"time"
 
+	"github.com/Jeff-Rowell/hpotter/internal/services"
 	"github.com/Jeff-Rowell/hpotter/types"
 	"github.com/docker/go-connections/nat"
 	"github.com/moby/moby/api/types/container"
@@ -134,7 +135,7 @@ func (dc *DatabaseContainer) StartContainer() error {
 	var hostConfig *container.HostConfig
 
 	containerConfig = &container.Config{
-		Image: dc.Config.DBImageName,
+		Image: services.DefaultDBImageName,
 		Env:   envVars,
 		Labels: map[string]string{
 			"hpotter": "database",

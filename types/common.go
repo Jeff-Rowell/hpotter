@@ -6,7 +6,6 @@ type EnvVar struct {
 }
 
 type Service struct {
-	ImageName          string   `yaml:"image_name"`
 	ListenAddress      string   `yaml:"listen_address"`
 	ListenPort         int      `yaml:"listen_port"`
 	ListenProto        string   `yaml:"listen_proto"`
@@ -22,10 +21,9 @@ type Service struct {
 }
 
 type DBConfig struct {
-	DBType      string `yaml:"db_type"`
-	User        string `yaml:"user"`
-	Password    string `yaml:"password"`
-	DBImageName string `yaml:"image_name"`
+	DBType   string `yaml:"db_type"`
+	User     string `yaml:"user"`
+	Password string `yaml:"password"`
 }
 
 type IPInfo struct {
