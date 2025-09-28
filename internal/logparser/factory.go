@@ -5,6 +5,7 @@ import (
 	"slices"
 	"strings"
 
+	"github.com/Jeff-Rowell/hpotter/internal/services"
 	"github.com/Jeff-Rowell/hpotter/types"
 )
 
@@ -15,7 +16,10 @@ func NewLogParserFactory() LogParserFactory {
 }
 
 func (f *DefaultLogParserFactory) CreateParser(service types.Service) (LogParser, error) {
-	switch strings.ToLower(service.ServiceName) {
+	serviceRegistry := services.NewServiceRegistry()
+	serviceName := strings.ToLower(serviceRegistry.GetServiceNameByConfig(service))
+
+	switch serviceName {
 	case "ssh":
 		return NewSSHLogParser(service), nil
 	case "telnet":
@@ -23,7 +27,7 @@ func (f *DefaultLogParserFactory) CreateParser(service types.Service) (LogParser
 	case "httpd":
 		return NewHttpdLogParser(service), nil
 	default:
-		return nil, fmt.Errorf("no log parser available for service: %s", service.ServiceName)
+		return nil, fmt.Errorf("no log parser available for service: %s", serviceName)
 	}
 }
 
@@ -32,8 +36,9 @@ func (f *DefaultLogParserFactory) SupportedProtocols() []string {
 }
 
 func (f *DefaultLogParserFactory) IsSupported(service types.Service) bool {
+	serviceRegistry := services.NewServiceRegistry()
 	supported := f.SupportedProtocols()
-	serviceName := strings.ToLower(service.ServiceName)
+	serviceName := strings.ToLower(serviceRegistry.GetServiceNameByConfig(service))
 
 	return slices.Contains(supported, serviceName)
 }

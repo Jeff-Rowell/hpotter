@@ -11,7 +11,6 @@ type Service struct {
 	ListenProto        string   `yaml:"listen_proto"`
 	RequestSave        bool     `yaml:"request_save"`
 	EnvVars            []EnvVar `yaml:"envvars,omitempty"`
-	ServiceName        string   `yaml:"service_name"`
 	CollectCredentials bool     `yaml:"collect_credentials"`
 	UseTLS             bool     `yaml:"use_tls,omitempty"`
 	CertificatePath    string   `yaml:"certificate_path,omitempty"`

@@ -55,7 +55,7 @@ func NewContainerThread(service types.Service, source net.Conn, ctx context.Cont
 
 func (c *Container) LaunchContainer() {
 	serviceRegistry := services.NewServiceRegistry()
-	imageName := serviceRegistry.GetImageName(c.Svc.ServiceName)
+	imageName := serviceRegistry.GetImageNameByConfig(c.Svc)
 	log.Printf("creating container: %s", filepath.Clean(imageName))
 	port, err := nat.NewPort(c.Svc.ListenProto, strconv.Itoa(c.Svc.ListenPort))
 	if err != nil {
@@ -81,7 +81,8 @@ func (c *Container) LaunchContainer() {
 	}
 
 	var binds []string
-	if c.Svc.ServiceName == "httpd" {
+	serviceName := serviceRegistry.GetServiceNameByConfig(c.Svc)
+	if serviceName == "httpd" {
 		configPath, err := c.renderHttpdConfig()
 		if err != nil {
 			log.Fatalf("error rendering httpd config: %v", err)
@@ -153,7 +154,7 @@ func (c *Container) LaunchContainer() {
 
 func (c *Container) Connect() {
 	serviceRegistry := services.NewServiceRegistry()
-	imageName := serviceRegistry.GetImageName(c.Svc.ServiceName)
+	imageName := serviceRegistry.GetImageNameByConfig(c.Svc)
 	log.Printf("connecting to container %s running image %s", c.CreateResponse.ID, imageName)
 	inspectResponse, err := c.DockerClient.ContainerInspect(c.Ctx, c.CreateResponse.ID)
 	if err != nil {

@@ -64,7 +64,7 @@ func StartListener(service types.Service, wg *sync.WaitGroup, ctx context.Contex
 			log.Printf("connection received: (src=%s, dst=%s, proto=%s)", conn.RemoteAddr(), conn.LocalAddr(), conn.LocalAddr().Network())
 
 			serviceRegistry := services.NewServiceRegistry()
-			imageName := serviceRegistry.GetImageName(service.ServiceName)
+			imageName := serviceRegistry.GetImageNameByConfig(service)
 			dbConn := buildConnection(imageName, conn)
 
 			if service.CollectCredentials {
