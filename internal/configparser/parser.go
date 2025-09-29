@@ -38,10 +38,25 @@ func (p *Parser) Parse(configFile string) {
 	for i := range p.Services {
 		svc := &p.Services[i]
 
-		// Determine service type from port/protocol
-		serviceName := serviceRegistry.GetServiceNameByConfig(*svc)
-		if serviceName == "" {
-			log.Fatalf("error: unsupported service configuration (port: %d, protocol: %s). %s", svc.ListenPort, svc.ListenProto, serviceRegistry.GetSupportedServicesString())
+		// Get service details from registry by name
+		var serviceName string
+		if svc.Service != "" {
+			// New format: service name specified
+			serviceName = svc.Service
+			if !serviceRegistry.IsSupported(serviceName) {
+				log.Fatalf("error: unsupported service '%s'. %s", serviceName, serviceRegistry.GetSupportedServicesString())
+			}
+
+			// Populate port/protocol from registry
+			registryService, _ := serviceRegistry.FindService(serviceName)
+			svc.ListenPort = registryService.Port
+			svc.ListenProto = registryService.Protocol
+		} else {
+			// Legacy format: port/protocol specified
+			serviceName = serviceRegistry.GetServiceNameByConfig(*svc)
+			if serviceName == "" {
+				log.Fatalf("error: unsupported service configuration (port: %d, protocol: %s). %s", svc.ListenPort, svc.ListenProto, serviceRegistry.GetSupportedServicesString())
+			}
 		}
 
 		if svc.CollectCredentials {

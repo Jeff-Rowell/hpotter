@@ -6,9 +6,10 @@ type EnvVar struct {
 }
 
 type Service struct {
+	Service            string   `yaml:"service"`
 	ListenAddress      string   `yaml:"listen_address"`
-	ListenPort         int      `yaml:"listen_port"`
-	ListenProto        string   `yaml:"listen_proto"`
+	ListenPort         int      `yaml:"listen_port,omitempty"`
+	ListenProto        string   `yaml:"listen_proto,omitempty"`
 	RequestSave        bool     `yaml:"request_save"`
 	EnvVars            []EnvVar `yaml:"envvars,omitempty"`
 	CollectCredentials bool     `yaml:"collect_credentials"`
