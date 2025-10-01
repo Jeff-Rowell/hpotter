@@ -13,6 +13,7 @@ import (
 	"github.com/Jeff-Rowell/hpotter/internal/cleanup"
 	"github.com/Jeff-Rowell/hpotter/internal/configparser"
 	"github.com/Jeff-Rowell/hpotter/internal/database"
+	"github.com/Jeff-Rowell/hpotter/internal/frontend"
 	"github.com/Jeff-Rowell/hpotter/internal/threads"
 )
 
@@ -68,6 +69,18 @@ func main() {
 	log.Printf("database initialized successfully")
 
 	var wg sync.WaitGroup
+
+	if config.FrontendConfig.Enabled {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			frontendServer := frontend.NewServer(":80")
+			if err := frontendServer.Start(); err != nil {
+				log.Printf("frontend server error: %v", err)
+			}
+		}()
+	}
+
 	log.Printf("starting %d socket listeners", len(config.Services))
 	for _, serviceCfg := range config.Services {
 		wg.Add(1)

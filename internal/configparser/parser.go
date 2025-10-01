@@ -12,8 +12,9 @@ import (
 )
 
 type Parser struct {
-	DBConfig types.DBConfig  `yaml:"db_config"`
-	Services []types.Service `yaml:"services"`
+	DBConfig       types.DBConfig       `yaml:"db_config"`
+	Services       []types.Service      `yaml:"services"`
+	FrontendConfig types.FrontendConfig `yaml:"frontend"`
 }
 
 func NewParser() Parser {

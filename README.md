@@ -23,7 +23,7 @@ HPotter is a honney pot implementation that creates disposible containers upon e
 services:
   # HTTPd service - automatically runs on port 8080/tcp
   - service: "httpd"
-    listen_address: "0.0.0.0"  # optional, defaults to localhost (127.0.0.1)
+    listen_address: "0.0.0.0" # optional, defaults to localhost (127.0.0.1)
     request_save: true
     collect_credentials: true
     # TLS options (optional, only for httpd service)
@@ -37,19 +37,22 @@ services:
   - service: "ssh"
     request_save: true
     collect_credentials: true
-    command_limit: 10  # optional, defaults to 10 for ssh/telnet
+    command_limit: 10 # optional, defaults to 10 for ssh/telnet
 
   # Telnet service - automatically runs on port 2223/tcp
   - service: "telnet"
     request_save: true
     collect_credentials: true
-    command_limit: 15  # optional, defaults to 10 for ssh/telnet
+    command_limit: 15 # optional, defaults to 10 for ssh/telnet
     # Required environment variables are automatically added
 
 db_config:
   db_type: "postgres"
   user: "your_db_user"
   password: "your_db_password"
+
+frontend:
+  enabled: false
 ```
 
 </details>

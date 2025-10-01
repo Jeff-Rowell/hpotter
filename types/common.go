@@ -26,6 +26,10 @@ type DBConfig struct {
 	Password string `yaml:"password"`
 }
 
+type FrontendConfig struct {
+	Enabled bool `yaml:"enabled"`
+}
+
 type IPInfo struct {
 	Latitude  float32 `json:"lat"`
 	Longitude float32 `json:"lon"`
