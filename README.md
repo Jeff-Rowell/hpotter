@@ -21,38 +21,35 @@ HPotter is a honney pot implementation that creates disposible containers upon e
 
 ```yaml
 services:
-  - service_name: "httpd"
-    listen_port: 8080
-    listen_proto: "tcp"
+  # HTTPd service - automatically runs on port 8080/tcp
+  - service: "httpd"
+    listen_address: "0.0.0.0"  # optional, defaults to localhost (127.0.0.1)
     request_save: true
-    socket_timeout: 10
     collect_credentials: true
     # TLS options (optional, only for httpd service)
-    # use_tls: true
-    # Option 1: Use existing certificates
-    # certificate_path: "/path/to/certificate.crt"
-    # key_path: "/path/to/private.key"
-    # Option 2: Generate self-signed certificates automatically
+    use_tls: true
+    certificate_path: "/path/to/certificate.crt"
+    key_path: "/path/to/private.key"
+    # OR generate self-signed certificates automatically
     # generate_certs: true
-  - service_name: "ssh"
-    listen_port: 2222
-    listen_proto: "tcp"
+
+  # SSH service - automatically runs on port 2222/tcp
+  - service: "ssh"
     request_save: true
-    socket_timeout: 10
-    collect_credentials: false
-  - service_name: "telnet"
-    listen_port: 2223
-    listen_proto: "tcp"
+    collect_credentials: true
+    command_limit: 10  # optional, defaults to 10 for ssh/telnet
+
+  # Telnet service - automatically runs on port 2223/tcp
+  - service: "telnet"
     request_save: true
-    socket_timeout: 10
-    collect_credentials: false
-    envvars:
-      - key: "COWRIE_TELNET_ENABLED"
-        value: "yes"
+    collect_credentials: true
+    command_limit: 15  # optional, defaults to 10 for ssh/telnet
+    # Required environment variables are automatically added
+
 db_config:
   db_type: "postgres"
-  user: ""
-  password: ""
+  user: "your_db_user"
+  password: "your_db_password"
 ```
 
 </details>
