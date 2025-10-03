@@ -27,7 +27,9 @@ type DBConfig struct {
 }
 
 type FrontendConfig struct {
-	Enabled bool `yaml:"enabled"`
+	Enabled       bool   `yaml:"enabled"`
+	Port          int    `yaml:"port"`
+	ListenAddress string `yaml:"listen_address"`
 }
 
 type IPInfo struct {

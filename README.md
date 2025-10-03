@@ -52,7 +52,9 @@ db_config:
   password: "your_db_password"
 
 frontend:
-  enabled: false
+  enabled: true
+  port: 80
+  listen_address: "127.0.0.1"
 ```
 
 </details>

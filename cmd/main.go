@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"log"
 	"os"
 	"os/signal"
@@ -74,7 +75,7 @@ func main() {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			frontendServer := frontend.NewServer(":80")
+			frontendServer := frontend.NewServer(fmt.Sprintf("%s:%d", config.FrontendConfig.ListenAddress, config.FrontendConfig.Port))
 			if err := frontendServer.Start(); err != nil {
 				log.Printf("frontend server error: %v", err)
 			}
