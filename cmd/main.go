@@ -75,7 +75,8 @@ func main() {
 		wg.Add(1)
 		go func() {
 			defer wg.Done()
-			frontendServer := frontend.NewServer(fmt.Sprintf("%s:%d", config.FrontendConfig.ListenAddress, config.FrontendConfig.Port))
+			frontendAddr := fmt.Sprintf("%s:%d", config.FrontendConfig.ListenAddress, config.FrontendConfig.Port)
+			frontendServer := frontend.NewServer(frontendAddr, db.DB)
 			if err := frontendServer.Start(); err != nil {
 				log.Printf("frontend server error: %v", err)
 			}
