@@ -77,7 +77,7 @@ func main() {
 			defer wg.Done()
 			frontendAddr := fmt.Sprintf("%s:%d", config.FrontendConfig.ListenAddress, config.FrontendConfig.Port)
 			frontendServer := frontend.NewServer(frontendAddr, db.DB)
-			if err := frontendServer.Start(); err != nil {
+			if err := frontendServer.Start(ctx); err != nil {
 				log.Printf("frontend server error: %v", err)
 			}
 		}()
