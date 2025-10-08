@@ -61,6 +61,102 @@
   });
   0; //eaimeta@70e063a35619d71f0,"@glimmer/component/-private/ember-component-manager"eaimeta@70e063a35619d71f
 });
+;define("hpotter-ui/components/world-map", ["exports", "@ember/component", "@glimmer/component", "@ember/object", "globe.gl", "@ember/template-factory"], function (_exports, _component, _component2, _object, _globe, _templateFactory) {
+  "use strict";
+
+  Object.defineProperty(_exports, "__esModule", {
+    value: true
+  });
+  _exports.default = void 0;
+  var _class;
+  0; //eaimeta@70e063a35619d71f0,"@glimmer/component",0,"@ember/object",0,"globe.gl",0,"@ember/template-factory",0,"@ember/component"eaimeta@70e063a35619d71f
+  function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+  function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == typeof i ? i : i + ""; }
+  function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+  function _applyDecoratedDescriptor(i, e, r, n, l) { var a = {}; return Object.keys(n).forEach(function (i) { a[i] = n[i]; }), a.enumerable = !!a.enumerable, a.configurable = !!a.configurable, ("value" in a || a.initializer) && (a.writable = !0), a = r.slice().reverse().reduce(function (r, n) { return n(i, e, r) || r; }, a), l && void 0 !== a.initializer && (a.value = a.initializer ? a.initializer.call(l) : void 0, a.initializer = void 0), void 0 === a.initializer ? (Object.defineProperty(i, e, a), null) : a; }
+  const __COLOCATED_TEMPLATE__ = (0, _templateFactory.createTemplateFactory)(
+  /*
+    <div
+    class="world-globe"
+    {{did-insert this.setupGlobe}}
+    {{will-destroy this.teardownGlobe}}
+  ></div>
+  
+  */
+  {
+    "id": "KYJuY/S6",
+    "block": "[[[11,0],[24,0,\"world-globe\"],[4,[38,1],[[30,0,[\"setupGlobe\"]]],null],[4,[38,2],[[30,0,[\"teardownGlobe\"]]],null],[12],[13],[1,\"\\n\"]],[],false,[\"div\",\"did-insert\",\"will-destroy\"]]",
+    "moduleName": "hpotter-ui/components/world-map.hbs",
+    "isStrictMode": false
+  });
+  let WorldMapComponent = _exports.default = (_class = class WorldMapComponent extends _component2.default {
+    constructor(...args) {
+      super(...args);
+      _defineProperty(this, "globe", null);
+    }
+    setupGlobe(element) {
+      const {
+        connections
+      } = this.args;
+
+      // Create globe instance
+      this.globe = (0, _globe.default)()(element).globeImageUrl('//unpkg.com/three-globe/example/img/earth-blue-marble.jpg').bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png').backgroundImageUrl('//unpkg.com/three-globe/example/img/night-sky.png').pointOfView({
+        altitude: 2.5
+      }).atmosphereColor('#3a228a').atmosphereAltitude(0.25);
+
+      // Process connections data
+      if (connections && connections.length > 0) {
+        const points = connections.filter(conn => conn.latitude && conn.longitude && Math.abs(conn.latitude) > 0.0001 && Math.abs(conn.longitude) > 0.0001).map(conn => ({
+          lat: conn.latitude,
+          lng: conn.longitude,
+          size: 0.3,
+          color: '#ef4444',
+          source_address: conn.source_address,
+          source_port: conn.source_port,
+          destination_address: conn.destination_address,
+          destination_port: conn.destination_port,
+          container: conn.container,
+          created_at: conn.created_at
+        }));
+
+        // Add points to globe
+        this.globe.pointsData(points).pointAltitude(0.01).pointRadius('size').pointColor('color').pointLabel(point => `
+          <div style="background: rgba(0,0,0,0.9); padding: 8px; border-radius: 4px; font-size: 12px;">
+            <strong style="color: #ef4444;">Connection</strong><br/>
+            <strong>Source:</strong> ${point.source_address}:${point.source_port}<br/>
+            <strong>Dest:</strong> ${point.destination_address}:${point.destination_port}<br/>
+            <strong>Container:</strong> ${point.container}<br/>
+            <strong>Time:</strong> ${new Date(point.created_at).toLocaleString()}
+          </div>
+        `);
+
+        // Auto-rotate the globe
+        this.globe.controls().autoRotate = true;
+        this.globe.controls().autoRotateSpeed = 0.5;
+      }
+
+      // Handle window resize
+      this.handleResize = () => {
+        if (this.globe) {
+          this.globe.width(element.clientWidth);
+          this.globe.height(element.clientHeight);
+        }
+      };
+      window.addEventListener('resize', this.handleResize);
+    }
+    teardownGlobe() {
+      if (this.handleResize) {
+        window.removeEventListener('resize', this.handleResize);
+      }
+      if (this.globe) {
+        // Clean up Three.js resources
+        this.globe._destructor();
+        this.globe = null;
+      }
+    }
+  }, _applyDecoratedDescriptor(_class.prototype, "setupGlobe", [_object.action], Object.getOwnPropertyDescriptor(_class.prototype, "setupGlobe"), _class.prototype), _applyDecoratedDescriptor(_class.prototype, "teardownGlobe", [_object.action], Object.getOwnPropertyDescriptor(_class.prototype, "teardownGlobe"), _class.prototype), _class);
+  (0, _component.setComponentTemplate)(__COLOCATED_TEMPLATE__, WorldMapComponent);
+});
 ;define("hpotter-ui/container-debug-adapter", ["exports", "ember-resolver/container-debug-adapter"], function (_exports, _containerDebugAdapter) {
   "use strict";
 
@@ -187,6 +283,48 @@
     initializer: null
   }), _class);
 });
+;define("hpotter-ui/modifiers/did-insert", ["exports", "@ember/render-modifiers/modifiers/did-insert"], function (_exports, _didInsert) {
+  "use strict";
+
+  Object.defineProperty(_exports, "__esModule", {
+    value: true
+  });
+  Object.defineProperty(_exports, "default", {
+    enumerable: true,
+    get: function () {
+      return _didInsert.default;
+    }
+  });
+  0; //eaimeta@70e063a35619d71f0,"@ember/render-modifiers/modifiers/did-insert"eaimeta@70e063a35619d71f
+});
+;define("hpotter-ui/modifiers/did-update", ["exports", "@ember/render-modifiers/modifiers/did-update"], function (_exports, _didUpdate) {
+  "use strict";
+
+  Object.defineProperty(_exports, "__esModule", {
+    value: true
+  });
+  Object.defineProperty(_exports, "default", {
+    enumerable: true,
+    get: function () {
+      return _didUpdate.default;
+    }
+  });
+  0; //eaimeta@70e063a35619d71f0,"@ember/render-modifiers/modifiers/did-update"eaimeta@70e063a35619d71f
+});
+;define("hpotter-ui/modifiers/will-destroy", ["exports", "@ember/render-modifiers/modifiers/will-destroy"], function (_exports, _willDestroy) {
+  "use strict";
+
+  Object.defineProperty(_exports, "__esModule", {
+    value: true
+  });
+  Object.defineProperty(_exports, "default", {
+    enumerable: true,
+    get: function () {
+      return _willDestroy.default;
+    }
+  });
+  0; //eaimeta@70e063a35619d71f0,"@ember/render-modifiers/modifiers/will-destroy"eaimeta@70e063a35619d71f
+});
 ;define("hpotter-ui/router", ["exports", "@ember/routing/router", "hpotter-ui/config/environment"], function (_exports, _router, _environment) {
   "use strict";
 
@@ -208,6 +346,7 @@
   _exports.default = Router;
   Router.map(function () {
     this.route('connections');
+    this.route('map');
   });
 });
 ;define("hpotter-ui/routes/connections", ["exports", "@ember/routing/route", "@ember/service"], function (_exports, _route, _service) {
@@ -239,6 +378,26 @@
     writable: true,
     initializer: null
   }), _class);
+});
+;define("hpotter-ui/routes/map", ["exports", "@ember/routing/route", "fetch"], function (_exports, _route, _fetch) {
+  "use strict";
+
+  Object.defineProperty(_exports, "__esModule", {
+    value: true
+  });
+  _exports.default = void 0;
+  0; //eaimeta@70e063a35619d71f0,"@ember/routing/route",0,"fetch"eaimeta@70e063a35619d71f
+  class MapRoute extends _route.default {
+    async model() {
+      // Fetch geo data from the API
+      const response = await (0, _fetch.default)('/api/geo-data?limit=1000');
+      if (!response.ok) {
+        throw new Error('Failed to fetch geo data');
+      }
+      return response.json();
+    }
+  }
+  _exports.default = MapRoute;
 });
 ;define("hpotter-ui/serializers/application", ["exports", "@ember-data/serializer/rest"], function (_exports, _rest) {
   "use strict";
@@ -301,6 +460,7 @@
       <nav>
         <LinkTo @route="index">Home</LinkTo>
         <LinkTo @route="connections">Connections</LinkTo>
+        <LinkTo @route="map">Map</LinkTo>
       </nav>
     </header>
   
@@ -311,8 +471,8 @@
   
   */
   {
-    "id": "bm+ebCu/",
-    "block": "[[[10,0],[14,0,\"app-container\"],[12],[1,\"\\n  \"],[10,\"header\"],[14,0,\"app-header\"],[12],[1,\"\\n    \"],[10,\"h1\"],[12],[1,\"HPotter - Honeypot Monitor\"],[13],[1,\"\\n    \"],[10,\"nav\"],[12],[1,\"\\n      \"],[8,[39,4],null,[[\"@route\"],[\"index\"]],[[\"default\"],[[[[1,\"Home\"]],[]]]]],[1,\"\\n      \"],[8,[39,4],null,[[\"@route\"],[\"connections\"]],[[\"default\"],[[[[1,\"Connections\"]],[]]]]],[1,\"\\n    \"],[13],[1,\"\\n  \"],[13],[1,\"\\n\\n  \"],[10,\"main\"],[14,0,\"app-content\"],[12],[1,\"\\n    \"],[46,[28,[37,7],null,null],null,null,null],[1,\"\\n  \"],[13],[1,\"\\n\"],[13],[1,\"\\n\"]],[],false,[\"div\",\"header\",\"h1\",\"nav\",\"link-to\",\"main\",\"component\",\"-outlet\"]]",
+    "id": "580fi7yt",
+    "block": "[[[10,0],[14,0,\"app-container\"],[12],[1,\"\\n  \"],[10,\"header\"],[14,0,\"app-header\"],[12],[1,\"\\n    \"],[10,\"h1\"],[12],[1,\"HPotter - Honeypot Monitor\"],[13],[1,\"\\n    \"],[10,\"nav\"],[12],[1,\"\\n      \"],[8,[39,4],null,[[\"@route\"],[\"index\"]],[[\"default\"],[[[[1,\"Home\"]],[]]]]],[1,\"\\n      \"],[8,[39,4],null,[[\"@route\"],[\"connections\"]],[[\"default\"],[[[[1,\"Connections\"]],[]]]]],[1,\"\\n      \"],[8,[39,4],null,[[\"@route\"],[\"map\"]],[[\"default\"],[[[[1,\"Map\"]],[]]]]],[1,\"\\n    \"],[13],[1,\"\\n  \"],[13],[1,\"\\n\\n  \"],[10,\"main\"],[14,0,\"app-content\"],[12],[1,\"\\n    \"],[46,[28,[37,7],null,null],null,null,null],[1,\"\\n  \"],[13],[1,\"\\n\"],[13],[1,\"\\n\"]],[],false,[\"div\",\"header\",\"h1\",\"nav\",\"link-to\",\"main\",\"component\",\"-outlet\"]]",
     "moduleName": "hpotter-ui/templates/application.hbs",
     "isStrictMode": false
   });
@@ -392,14 +552,56 @@
   
     <div class="quick-links">
       <LinkTo @route="connections" class="btn btn-primary">View Connections</LinkTo>
+      <LinkTo @route="map" class="btn btn-primary">View Map</LinkTo>
     </div>
   </div>
   
   */
   {
-    "id": "mSwcPYkQ",
-    "block": "[[[10,0],[14,0,\"home-page\"],[12],[1,\"\\n  \"],[10,\"h2\"],[12],[1,\"Welcome to HPotter\"],[13],[1,\"\\n  \"],[10,2],[12],[1,\"This is a honeypot monitoring interface. View recent connections and attack attempts.\"],[13],[1,\"\\n\\n  \"],[10,0],[14,0,\"quick-links\"],[12],[1,\"\\n    \"],[8,[39,3],[[24,0,\"btn btn-primary\"]],[[\"@route\"],[\"connections\"]],[[\"default\"],[[[[1,\"View Connections\"]],[]]]]],[1,\"\\n  \"],[13],[1,\"\\n\"],[13],[1,\"\\n\"]],[],false,[\"div\",\"h2\",\"p\",\"link-to\"]]",
+    "id": "5QwOJYzS",
+    "block": "[[[10,0],[14,0,\"home-page\"],[12],[1,\"\\n  \"],[10,\"h2\"],[12],[1,\"Welcome to HPotter\"],[13],[1,\"\\n  \"],[10,2],[12],[1,\"This is a honeypot monitoring interface. View recent connections and attack attempts.\"],[13],[1,\"\\n\\n  \"],[10,0],[14,0,\"quick-links\"],[12],[1,\"\\n    \"],[8,[39,3],[[24,0,\"btn btn-primary\"]],[[\"@route\"],[\"connections\"]],[[\"default\"],[[[[1,\"View Connections\"]],[]]]]],[1,\"\\n    \"],[8,[39,3],[[24,0,\"btn btn-primary\"]],[[\"@route\"],[\"map\"]],[[\"default\"],[[[[1,\"View Map\"]],[]]]]],[1,\"\\n  \"],[13],[1,\"\\n\"],[13],[1,\"\\n\"]],[],false,[\"div\",\"h2\",\"p\",\"link-to\"]]",
     "moduleName": "hpotter-ui/templates/index.hbs",
+    "isStrictMode": false
+  });
+});
+;define("hpotter-ui/templates/map", ["exports", "@ember/template-factory"], function (_exports, _templateFactory) {
+  "use strict";
+
+  Object.defineProperty(_exports, "__esModule", {
+    value: true
+  });
+  _exports.default = void 0;
+  0; //eaimeta@70e063a35619d71f0,"@ember/template-factory"eaimeta@70e063a35619d71f
+  var _default = _exports.default = (0, _templateFactory.createTemplateFactory)(
+  /*
+    <div class="map-page">
+    <div class="map-header">
+      <h2>Connection Map</h2>
+      <p class="map-info">
+        {{#if @model}}
+          Showing {{@model.length}} connection(s) with geographic data
+        {{else}}
+          No geographic data available
+        {{/if}}
+      </p>
+    </div>
+  
+    <div class="map-container">
+      {{#if @model}}
+        <WorldMap @connections={{@model}} />
+      {{else}}
+        <div class="no-data">
+          <p>No connections with location data found.</p>
+        </div>
+      {{/if}}
+    </div>
+  </div>
+  
+  */
+  {
+    "id": "KA6IjkYs",
+    "block": "[[[10,0],[14,0,\"map-page\"],[12],[1,\"\\n  \"],[10,0],[14,0,\"map-header\"],[12],[1,\"\\n    \"],[10,\"h2\"],[12],[1,\"Connection Map\"],[13],[1,\"\\n    \"],[10,2],[14,0,\"map-info\"],[12],[1,\"\\n\"],[41,[30,1],[[[1,\"        Showing \"],[1,[30,1,[\"length\"]]],[1,\" connection(s) with geographic data\\n\"]],[]],[[[1,\"        No geographic data available\\n\"]],[]]],[1,\"    \"],[13],[1,\"\\n  \"],[13],[1,\"\\n\\n  \"],[10,0],[14,0,\"map-container\"],[12],[1,\"\\n\"],[41,[30,1],[[[1,\"      \"],[8,[39,4],null,[[\"@connections\"],[[30,1]]],null],[1,\"\\n\"]],[]],[[[1,\"      \"],[10,0],[14,0,\"no-data\"],[12],[1,\"\\n        \"],[10,2],[12],[1,\"No connections with location data found.\"],[13],[1,\"\\n      \"],[13],[1,\"\\n\"]],[]]],[1,\"  \"],[13],[1,\"\\n\"],[13],[1,\"\\n\"]],[\"@model\"],false,[\"div\",\"h2\",\"p\",\"if\",\"world-map\"]]",
+    "moduleName": "hpotter-ui/templates/map.hbs",
     "isStrictMode": false
   });
 });

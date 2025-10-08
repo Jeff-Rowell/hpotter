@@ -48461,6 +48461,247 @@ define("rsvp", ["exports"], function (_exports) {
   });
 })(typeof window !== 'undefined' && window || typeof globalThis !== 'undefined' && globalThis || typeof self !== 'undefined' && self || typeof global !== 'undefined' && global);
     }
+;define("@ember/render-modifiers/modifiers/did-insert", ["exports", "@ember/modifier"], function (_exports, _modifier) {
+  "use strict";
+
+  Object.defineProperty(_exports, "__esModule", {
+    value: true
+  });
+  _exports.default = void 0;
+  /**
+    The `{{did-insert}}` element modifier is activated when an element is
+    inserted into the DOM.
+  
+    In this example, the `fadeIn` function receives the `div` DOM element as its
+    first argument and is executed after the element is inserted into the DOM.
+  
+    ```handlebars
+    <div {{did-insert this.fadeIn}} class="alert">
+      {{yield}}
+    </div>
+    ```
+  
+    ```js
+    export default Component.extend({
+      fadeIn(element) {
+        element.classList.add('fade-in');
+      }
+    });
+    ```
+  
+    By default, the executed function will be unbound. If you would like to access
+    the component context in your function, use the `action` decorator as follows:
+  
+    ```handlebars
+    <div {{did-insert this.incrementCount}}>first</div>
+    <div {{did-insert this.incrementCount}}>second</div>
+  
+    <p>{{this.count}} elements were rendered</p>
+    ```
+  
+    ```js
+    export default Component.extend({
+      count: tracked({ value: 0 }),
+  
+      incrementCount: action(function() {
+        this.count++;
+      })
+    });
+    ```
+  
+    @method did-insert
+    @public
+  */
+  var _default = _exports.default = (0, _modifier.setModifierManager)(() => ({
+    capabilities: (0, _modifier.capabilities)('3.22', {
+      disableAutoTracking: true
+    }),
+    createModifier() {},
+    installModifier(_state, element, {
+      positional: [fn, ...args],
+      named
+    }) {
+      fn(element, args, named);
+    },
+    updateModifier() {},
+    destroyModifier() {}
+  }), class DidInsertModifier {});
+});
+;define("@ember/render-modifiers/modifiers/did-update", ["exports", "@ember/modifier", "@embroider/macros/es-compat2"], function (_exports, _modifier, _esCompat) {
+  "use strict";
+
+  Object.defineProperty(_exports, "__esModule", {
+    value: true
+  });
+  _exports.default = void 0;
+  const untrack = function () {
+    {
+      // ember-source@3.27 shipped "real modules" by default, so we can just use
+      // importSync to get @glimmer/validator directly
+      return (0, _esCompat.default)(require("@glimmer/validator")).untrack;
+    }
+  }();
+
+  /**
+    The `{{did-update}}` element modifier is activated when any of its arguments
+    are updated. It does not run on initial render.
+  
+    In this example, the `resize` function receives the `textarea` DOM element as its
+    first argument and is executed anytime the `@text` argument changes.
+  
+    ```handlebars
+    <textarea {{did-update this.resize @text}} readonly style="padding: 0px;">
+      {{@text}}
+    </textarea>
+    ```
+  
+    ```js
+    export default Component.extend({
+      resize(element) {
+        element.style.height = `${element.scrollHeight}px`;
+      }
+    });
+    ```
+  
+    In addition to the `element`, both named and positional arguments are passed to the
+    executed function:
+  
+    ```handlebars
+    <div {{did-update this.logArguments @first @second third=@third}} />
+    ```
+  
+    ```js
+    export default Component.extend({
+      logArguments(element, [first, second], { third }) {
+        console.log('element', element);
+        console.log('positional args', first, second);
+        console.log('names args', third);
+      }
+    });
+    ```
+  
+    By default, the executed function will be unbound. If you would like to access
+    the component context in your function, use the `action` decorator as follows:
+  
+    ```handlebars
+    <div {{did-update this.someFunction @someArg} />
+    ```
+  
+    ```js
+    export default Component.extend({
+      someFunction: action(function(element, [someArg]) {
+        // the `this` context will be the component instance
+      })
+    });
+    ```
+  
+    @method did-update
+    @public
+  */
+  var _default = _exports.default = (0, _modifier.setModifierManager)(() => ({
+    capabilities: (0, _modifier.capabilities)('3.22', {
+      disableAutoTracking: false
+    }),
+    createModifier() {
+      return {
+        element: null
+      };
+    },
+    installModifier(state, element, args) {
+      // save element into state bucket
+      state.element = element;
+      {
+        // Consume individual properties to entangle tracking.
+        // https://github.com/emberjs/ember.js/issues/19277
+        // https://github.com/ember-modifier/ember-modifier/pull/63#issuecomment-815908201
+        args.positional.forEach(() => {});
+        args.named && Object.values(args.named);
+      }
+    },
+    updateModifier({
+      element
+    }, args) {
+      let [fn, ...positional] = args.positional;
+      {
+        // Consume individual properties to entangle tracking.
+        // https://github.com/emberjs/ember.js/issues/19277
+        // https://github.com/ember-modifier/ember-modifier/pull/63#issuecomment-815908201
+        args.positional.forEach(() => {});
+        args.named && Object.values(args.named);
+        untrack(() => {
+          fn(element, positional, args.named);
+        });
+      }
+    },
+    destroyModifier() {}
+  }), class DidUpdateModifier {});
+});
+;define("@ember/render-modifiers/modifiers/will-destroy", ["exports", "@ember/modifier"], function (_exports, _modifier) {
+  "use strict";
+
+  Object.defineProperty(_exports, "__esModule", {
+    value: true
+  });
+  _exports.default = void 0;
+  /**
+    The `{{will-destroy}}` element modifier is activated immediately before the element
+    is removed from the DOM.
+  
+    ```handlebars
+    <div {{will-destroy this.teardownPlugin}}>
+      {{yield}}
+    </div>
+    ```
+  
+    ```js
+    export default Component.extend({
+      teardownPlugin(element) {
+        // teardown logic here
+      }
+    });
+    ```
+  
+    By default, the executed function will be unbound. If you would like to access
+    the component context in your function, use the `action` decorator as follows:
+  
+    ```handlebars
+    <div {{will-destroy this.teardownPlugin}}>
+      {{yield}}
+    </div>
+    ```
+  
+    ```js
+    export default Component.extend({
+      teardownPlugin: action(function(element) {
+        // the `this` context will be the component instance
+      })
+    });
+    ```
+  
+    @method will-destroy
+    @public
+  */
+  var _default = _exports.default = (0, _modifier.setModifierManager)(() => ({
+    capabilities: (0, _modifier.capabilities)('3.22', {
+      disableAutoTracking: true
+    }),
+    createModifier() {
+      return {
+        element: null
+      };
+    },
+    installModifier(state, element) {
+      state.element = element;
+    },
+    updateModifier() {},
+    destroyModifier({
+      element
+    }, args) {
+      let [fn, ...positional] = args.positional;
+      fn(element, positional, args.named);
+    }
+  }), class WillDestroyModifier {});
+});
 ;define("@embroider/macros/es-compat2", ["exports"], function (_exports) {
   "use strict";
 

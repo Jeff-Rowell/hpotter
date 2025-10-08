@@ -1,0 +1,22 @@
+<div class="map-page">
+  <div class="map-header">
+    <h2>Connection Map</h2>
+    <p class="map-info">
+      {{#if @model}}
+        Showing {{@model.length}} connection(s) with geographic data
+      {{else}}
+        No geographic data available
+      {{/if}}
+    </p>
+  </div>
+
+  <div class="map-container">
+    {{#if @model}}
+      <WorldMap @connections={{@model}} />
+    {{else}}
+      <div class="no-data">
+        <p>No connections with location data found.</p>
+      </div>
+    {{/if}}
+  </div>
+</div>

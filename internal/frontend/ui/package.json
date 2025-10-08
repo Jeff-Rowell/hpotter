@@ -6,6 +6,11 @@
     "build": "ember build --environment=production",
     "start": "ember serve"
   },
+  "dependencies": {
+    "@ember/render-modifiers": "^2.1.0",
+    "globe.gl": "^2.31.0",
+    "three": "^0.168.0"
+  },
   "devDependencies": {
     "@ember/optional-features": "^2.1.0",
     "@glimmer/component": "^1.1.2",
