@@ -61,31 +61,78 @@
   });
   0; //eaimeta@70e063a35619d71f0,"@glimmer/component/-private/ember-component-manager"eaimeta@70e063a35619d71f
 });
-;define("hpotter-ui/components/world-map", ["exports", "@ember/component", "@glimmer/component", "@ember/object", "globe.gl", "@ember/template-factory"], function (_exports, _component, _component2, _object, _globe, _templateFactory) {
+;define("hpotter-ui/components/world-map", ["exports", "@ember/component", "@glimmer/component", "@ember/object", "@glimmer/tracking", "globe.gl", "@ember/template-factory"], function (_exports, _component, _component2, _object, _tracking, _globe, _templateFactory) {
   "use strict";
 
   Object.defineProperty(_exports, "__esModule", {
     value: true
   });
   _exports.default = void 0;
-  var _class;
-  0; //eaimeta@70e063a35619d71f0,"@glimmer/component",0,"@ember/object",0,"globe.gl",0,"@ember/template-factory",0,"@ember/component"eaimeta@70e063a35619d71f
+  var _class, _descriptor;
+  0; //eaimeta@70e063a35619d71f0,"@glimmer/component",0,"@ember/object",0,"@glimmer/tracking",0,"globe.gl",0,"@ember/template-factory",0,"@ember/component"eaimeta@70e063a35619d71f
+  function _initializerDefineProperty(e, i, r, l) { r && Object.defineProperty(e, i, { enumerable: r.enumerable, configurable: r.configurable, writable: r.writable, value: r.initializer ? r.initializer.call(l) : void 0 }); }
   function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
   function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == typeof i ? i : i + ""; }
   function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
   function _applyDecoratedDescriptor(i, e, r, n, l) { var a = {}; return Object.keys(n).forEach(function (i) { a[i] = n[i]; }), a.enumerable = !!a.enumerable, a.configurable = !!a.configurable, ("value" in a || a.initializer) && (a.writable = !0), a = r.slice().reverse().reduce(function (r, n) { return n(i, e, r) || r; }, a), l && void 0 !== a.initializer && (a.value = a.initializer ? a.initializer.call(l) : void 0, a.initializer = void 0), void 0 === a.initializer ? (Object.defineProperty(i, e, a), null) : a; }
+  function _initializerWarningHelper(r, e) { throw Error("Decorating class property failed. Please ensure that transform-class-properties is enabled and runs after the decorators transform."); }
   const __COLOCATED_TEMPLATE__ = (0, _templateFactory.createTemplateFactory)(
   /*
+    <div class="globe-wrapper">
     <div
-    class="world-globe"
-    {{did-insert this.setupGlobe}}
-    {{will-destroy this.teardownGlobe}}
-  ></div>
+      class="world-globe"
+      {{did-insert this.setupGlobe}}
+      {{will-destroy this.teardownGlobe}}
+    ></div>
+  
+    {{#if this.selectedConnection}}
+      <div class="connection-detail-panel">
+        <div class="detail-header">
+          <h3>Connection Details</h3>
+          <button class="close-btn" {{on "click" this.closeDetails}}>×</button>
+        </div>
+        <div class="detail-content">
+          <div class="detail-row">
+            <span class="detail-label">ID:</span>
+            <span class="detail-value">{{this.selectedConnection.id}}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Source Address:</span>
+            <span class="detail-value">{{this.selectedConnection.source_address}}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Source Port:</span>
+            <span class="detail-value">{{this.selectedConnection.source_port}}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Destination Address:</span>
+            <span class="detail-value">{{this.selectedConnection.destination_address}}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Destination Port:</span>
+            <span class="detail-value">{{this.selectedConnection.destination_port}}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Container:</span>
+            <span class="detail-value">{{this.selectedConnection.container}}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Location:</span>
+            <span class="detail-value">{{this.selectedConnection.lat}}, {{this.selectedConnection.lng}}</span>
+          </div>
+          <div class="detail-row">
+            <span class="detail-label">Timestamp:</span>
+            <span class="detail-value">{{this.selectedConnection.created_at}}</span>
+          </div>
+        </div>
+      </div>
+    {{/if}}
+  </div>
   
   */
   {
-    "id": "KYJuY/S6",
-    "block": "[[[11,0],[24,0,\"world-globe\"],[4,[38,1],[[30,0,[\"setupGlobe\"]]],null],[4,[38,2],[[30,0,[\"teardownGlobe\"]]],null],[12],[13],[1,\"\\n\"]],[],false,[\"div\",\"did-insert\",\"will-destroy\"]]",
+    "id": "UBaSvpap",
+    "block": "[[[10,0],[14,0,\"globe-wrapper\"],[12],[1,\"\\n  \"],[11,0],[24,0,\"world-globe\"],[4,[38,1],[[30,0,[\"setupGlobe\"]]],null],[4,[38,2],[[30,0,[\"teardownGlobe\"]]],null],[12],[13],[1,\"\\n\\n\"],[41,[30,0,[\"selectedConnection\"]],[[[1,\"    \"],[10,0],[14,0,\"connection-detail-panel\"],[12],[1,\"\\n      \"],[10,0],[14,0,\"detail-header\"],[12],[1,\"\\n        \"],[10,\"h3\"],[12],[1,\"Connection Details\"],[13],[1,\"\\n        \"],[11,\"button\"],[24,0,\"close-btn\"],[4,[38,6],[\"click\",[30,0,[\"closeDetails\"]]],null],[12],[1,\"×\"],[13],[1,\"\\n      \"],[13],[1,\"\\n      \"],[10,0],[14,0,\"detail-content\"],[12],[1,\"\\n        \"],[10,0],[14,0,\"detail-row\"],[12],[1,\"\\n          \"],[10,1],[14,0,\"detail-label\"],[12],[1,\"ID:\"],[13],[1,\"\\n          \"],[10,1],[14,0,\"detail-value\"],[12],[1,[30,0,[\"selectedConnection\",\"id\"]]],[13],[1,\"\\n        \"],[13],[1,\"\\n        \"],[10,0],[14,0,\"detail-row\"],[12],[1,\"\\n          \"],[10,1],[14,0,\"detail-label\"],[12],[1,\"Source Address:\"],[13],[1,\"\\n          \"],[10,1],[14,0,\"detail-value\"],[12],[1,[30,0,[\"selectedConnection\",\"source_address\"]]],[13],[1,\"\\n        \"],[13],[1,\"\\n        \"],[10,0],[14,0,\"detail-row\"],[12],[1,\"\\n          \"],[10,1],[14,0,\"detail-label\"],[12],[1,\"Source Port:\"],[13],[1,\"\\n          \"],[10,1],[14,0,\"detail-value\"],[12],[1,[30,0,[\"selectedConnection\",\"source_port\"]]],[13],[1,\"\\n        \"],[13],[1,\"\\n        \"],[10,0],[14,0,\"detail-row\"],[12],[1,\"\\n          \"],[10,1],[14,0,\"detail-label\"],[12],[1,\"Destination Address:\"],[13],[1,\"\\n          \"],[10,1],[14,0,\"detail-value\"],[12],[1,[30,0,[\"selectedConnection\",\"destination_address\"]]],[13],[1,\"\\n        \"],[13],[1,\"\\n        \"],[10,0],[14,0,\"detail-row\"],[12],[1,\"\\n          \"],[10,1],[14,0,\"detail-label\"],[12],[1,\"Destination Port:\"],[13],[1,\"\\n          \"],[10,1],[14,0,\"detail-value\"],[12],[1,[30,0,[\"selectedConnection\",\"destination_port\"]]],[13],[1,\"\\n        \"],[13],[1,\"\\n        \"],[10,0],[14,0,\"detail-row\"],[12],[1,\"\\n          \"],[10,1],[14,0,\"detail-label\"],[12],[1,\"Container:\"],[13],[1,\"\\n          \"],[10,1],[14,0,\"detail-value\"],[12],[1,[30,0,[\"selectedConnection\",\"container\"]]],[13],[1,\"\\n        \"],[13],[1,\"\\n        \"],[10,0],[14,0,\"detail-row\"],[12],[1,\"\\n          \"],[10,1],[14,0,\"detail-label\"],[12],[1,\"Location:\"],[13],[1,\"\\n          \"],[10,1],[14,0,\"detail-value\"],[12],[1,[30,0,[\"selectedConnection\",\"lat\"]]],[1,\", \"],[1,[30,0,[\"selectedConnection\",\"lng\"]]],[13],[1,\"\\n        \"],[13],[1,\"\\n        \"],[10,0],[14,0,\"detail-row\"],[12],[1,\"\\n          \"],[10,1],[14,0,\"detail-label\"],[12],[1,\"Timestamp:\"],[13],[1,\"\\n          \"],[10,1],[14,0,\"detail-value\"],[12],[1,[30,0,[\"selectedConnection\",\"created_at\"]]],[13],[1,\"\\n        \"],[13],[1,\"\\n      \"],[13],[1,\"\\n    \"],[13],[1,\"\\n\"]],[]],null],[13],[1,\"\\n\"]],[],false,[\"div\",\"did-insert\",\"will-destroy\",\"if\",\"h3\",\"button\",\"on\",\"span\"]]",
     "moduleName": "hpotter-ui/components/world-map.hbs",
     "isStrictMode": false
   });
@@ -93,6 +140,7 @@
     constructor(...args) {
       super(...args);
       _defineProperty(this, "globe", null);
+      _initializerDefineProperty(this, "selectedConnection", _descriptor, this);
     }
     setupGlobe(element) {
       const {
@@ -109,30 +157,38 @@
         const points = connections.filter(conn => conn.latitude && conn.longitude && Math.abs(conn.latitude) > 0.0001 && Math.abs(conn.longitude) > 0.0001).map(conn => ({
           lat: conn.latitude,
           lng: conn.longitude,
-          size: 0.3,
+          size: 0.4,
           color: '#ef4444',
           source_address: conn.source_address,
           source_port: conn.source_port,
           destination_address: conn.destination_address,
           destination_port: conn.destination_port,
           container: conn.container,
-          created_at: conn.created_at
+          created_at: conn.created_at,
+          id: conn.id
         }));
 
-        // Add points to globe
+        // Add points to globe with click handler
         this.globe.pointsData(points).pointAltitude(0.01).pointRadius('size').pointColor('color').pointLabel(point => `
-          <div style="background: rgba(0,0,0,0.9); padding: 8px; border-radius: 4px; font-size: 12px;">
-            <strong style="color: #ef4444;">Connection</strong><br/>
-            <strong>Source:</strong> ${point.source_address}:${point.source_port}<br/>
-            <strong>Dest:</strong> ${point.destination_address}:${point.destination_port}<br/>
-            <strong>Container:</strong> ${point.container}<br/>
-            <strong>Time:</strong> ${new Date(point.created_at).toLocaleString()}
+          <div style="background: rgba(0,0,0,0.95); padding: 10px 12px; border-radius: 6px; font-size: 13px; color: #fff; line-height: 1.6; border: 1px solid #ef4444;">
+            <div style="color: #ef4444; font-weight: 600; margin-bottom: 6px; font-size: 14px;">⚠️ Connection Details</div>
+            <div><strong>Source:</strong> ${point.source_address}:${point.source_port}</div>
+            <div><strong>Destination:</strong> ${point.destination_address}:${point.destination_port}</div>
+            <div><strong>Container:</strong> ${point.container}</div>
+            <div><strong>Time:</strong> ${new Date(point.created_at).toLocaleString()}</div>
+            <div style="margin-top: 8px; padding-top: 6px; border-top: 1px solid rgba(239, 68, 68, 0.3); font-size: 11px; color: #a0a4b8;">Click for more details</div>
           </div>
-        `);
+        `).onPointClick(point => {
+          this.handlePointClick(point);
+        }).onPointHover(point => {
+          // Change cursor on hover
+          element.style.cursor = point ? 'pointer' : 'grab';
+        });
 
-        // Auto-rotate the globe
-        this.globe.controls().autoRotate = true;
-        this.globe.controls().autoRotateSpeed = 0.5;
+        // Disable auto-rotation - allow manual control
+        this.globe.controls().autoRotate = false;
+        this.globe.controls().enableZoom = true;
+        this.globe.controls().enableRotate = true;
       }
 
       // Handle window resize
@@ -144,6 +200,22 @@
       };
       window.addEventListener('resize', this.handleResize);
     }
+    handlePointClick(point) {
+      if (!point) return;
+
+      // Store selected connection
+      this.selectedConnection = point;
+
+      // Zoom to the point
+      this.globe.pointOfView({
+        lat: point.lat,
+        lng: point.lng,
+        altitude: 1.5
+      }, 1000); // 1 second animation
+    }
+    closeDetails() {
+      this.selectedConnection = null;
+    }
     teardownGlobe() {
       if (this.handleResize) {
         window.removeEventListener('resize', this.handleResize);
@@ -154,7 +226,14 @@
         this.globe = null;
       }
     }
-  }, _applyDecoratedDescriptor(_class.prototype, "setupGlobe", [_object.action], Object.getOwnPropertyDescriptor(_class.prototype, "setupGlobe"), _class.prototype), _applyDecoratedDescriptor(_class.prototype, "teardownGlobe", [_object.action], Object.getOwnPropertyDescriptor(_class.prototype, "teardownGlobe"), _class.prototype), _class);
+  }, _descriptor = _applyDecoratedDescriptor(_class.prototype, "selectedConnection", [_tracking.tracked], {
+    configurable: true,
+    enumerable: true,
+    writable: true,
+    initializer: function () {
+      return null;
+    }
+  }), _applyDecoratedDescriptor(_class.prototype, "setupGlobe", [_object.action], Object.getOwnPropertyDescriptor(_class.prototype, "setupGlobe"), _class.prototype), _applyDecoratedDescriptor(_class.prototype, "handlePointClick", [_object.action], Object.getOwnPropertyDescriptor(_class.prototype, "handlePointClick"), _class.prototype), _applyDecoratedDescriptor(_class.prototype, "closeDetails", [_object.action], Object.getOwnPropertyDescriptor(_class.prototype, "closeDetails"), _class.prototype), _applyDecoratedDescriptor(_class.prototype, "teardownGlobe", [_object.action], Object.getOwnPropertyDescriptor(_class.prototype, "teardownGlobe"), _class.prototype), _class);
   (0, _component.setComponentTemplate)(__COLOCATED_TEMPLATE__, WorldMapComponent);
 });
 ;define("hpotter-ui/container-debug-adapter", ["exports", "ember-resolver/container-debug-adapter"], function (_exports, _containerDebugAdapter) {

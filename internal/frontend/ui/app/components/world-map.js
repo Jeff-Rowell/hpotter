@@ -1,9 +1,11 @@
 import Component from '@glimmer/component';
 import { action } from '@ember/object';
+import { tracked } from '@glimmer/tracking';
 import Globe from 'globe.gl';
 
 export default class WorldMapComponent extends Component {
   globe = null;
+  @tracked selectedConnection = null;
 
   @action
   setupGlobe(element) {
@@ -27,35 +29,45 @@ export default class WorldMapComponent extends Component {
         .map(conn => ({
           lat: conn.latitude,
           lng: conn.longitude,
-          size: 0.3,
+          size: 0.4,
           color: '#ef4444',
           source_address: conn.source_address,
           source_port: conn.source_port,
           destination_address: conn.destination_address,
           destination_port: conn.destination_port,
           container: conn.container,
-          created_at: conn.created_at
+          created_at: conn.created_at,
+          id: conn.id
         }));
 
-      // Add points to globe
+      // Add points to globe with click handler
       this.globe
         .pointsData(points)
         .pointAltitude(0.01)
         .pointRadius('size')
         .pointColor('color')
         .pointLabel(point => `
-          <div style="background: rgba(0,0,0,0.9); padding: 8px; border-radius: 4px; font-size: 12px;">
-            <strong style="color: #ef4444;">Connection</strong><br/>
-            <strong>Source:</strong> ${point.source_address}:${point.source_port}<br/>
-            <strong>Dest:</strong> ${point.destination_address}:${point.destination_port}<br/>
-            <strong>Container:</strong> ${point.container}<br/>
-            <strong>Time:</strong> ${new Date(point.created_at).toLocaleString()}
+          <div style="background: rgba(0,0,0,0.95); padding: 10px 12px; border-radius: 6px; font-size: 13px; color: #fff; line-height: 1.6; border: 1px solid #ef4444;">
+            <div style="color: #ef4444; font-weight: 600; margin-bottom: 6px; font-size: 14px;">⚠️ Connection Details</div>
+            <div><strong>Source:</strong> ${point.source_address}:${point.source_port}</div>
+            <div><strong>Destination:</strong> ${point.destination_address}:${point.destination_port}</div>
+            <div><strong>Container:</strong> ${point.container}</div>
+            <div><strong>Time:</strong> ${new Date(point.created_at).toLocaleString()}</div>
+            <div style="margin-top: 8px; padding-top: 6px; border-top: 1px solid rgba(239, 68, 68, 0.3); font-size: 11px; color: #a0a4b8;">Click for more details</div>
           </div>
-        `);
+        `)
+        .onPointClick((point) => {
+          this.handlePointClick(point);
+        })
+        .onPointHover((point) => {
+          // Change cursor on hover
+          element.style.cursor = point ? 'pointer' : 'grab';
+        });
 
-      // Auto-rotate the globe
-      this.globe.controls().autoRotate = true;
-      this.globe.controls().autoRotateSpeed = 0.5;
+      // Disable auto-rotation - allow manual control
+      this.globe.controls().autoRotate = false;
+      this.globe.controls().enableZoom = true;
+      this.globe.controls().enableRotate = true;
     }
 
     // Handle window resize
@@ -66,6 +78,26 @@ export default class WorldMapComponent extends Component {
       }
     };
     window.addEventListener('resize', this.handleResize);
+  }
+
+  @action
+  handlePointClick(point) {
+    if (!point) return;
+
+    // Store selected connection
+    this.selectedConnection = point;
+
+    // Zoom to the point
+    this.globe.pointOfView({
+      lat: point.lat,
+      lng: point.lng,
+      altitude: 1.5
+    }, 1000); // 1 second animation
+  }
+
+  @action
+  closeDetails() {
+    this.selectedConnection = null;
   }
 
   @action

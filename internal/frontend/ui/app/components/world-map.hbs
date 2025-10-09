@@ -1,5 +1,50 @@
-<div
-  class="world-globe"
-  {{did-insert this.setupGlobe}}
-  {{will-destroy this.teardownGlobe}}
-></div>
+<div class="globe-wrapper">
+  <div
+    class="world-globe"
+    {{did-insert this.setupGlobe}}
+    {{will-destroy this.teardownGlobe}}
+  ></div>
+
+  {{#if this.selectedConnection}}
+    <div class="connection-detail-panel">
+      <div class="detail-header">
+        <h3>Connection Details</h3>
+        <button class="close-btn" {{on "click" this.closeDetails}}>×</button>
+      </div>
+      <div class="detail-content">
+        <div class="detail-row">
+          <span class="detail-label">ID:</span>
+          <span class="detail-value">{{this.selectedConnection.id}}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Source Address:</span>
+          <span class="detail-value">{{this.selectedConnection.source_address}}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Source Port:</span>
+          <span class="detail-value">{{this.selectedConnection.source_port}}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Destination Address:</span>
+          <span class="detail-value">{{this.selectedConnection.destination_address}}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Destination Port:</span>
+          <span class="detail-value">{{this.selectedConnection.destination_port}}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Container:</span>
+          <span class="detail-value">{{this.selectedConnection.container}}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Location:</span>
+          <span class="detail-value">{{this.selectedConnection.lat}}, {{this.selectedConnection.lng}}</span>
+        </div>
+        <div class="detail-row">
+          <span class="detail-label">Timestamp:</span>
+          <span class="detail-value">{{this.selectedConnection.created_at}}</span>
+        </div>
+      </div>
+    </div>
+  {{/if}}
+</div>
