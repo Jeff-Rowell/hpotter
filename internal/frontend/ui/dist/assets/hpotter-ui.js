@@ -426,6 +426,7 @@
   Router.map(function () {
     this.route('connections');
     this.route('map');
+    this.route('credentials');
   });
 });
 ;define("hpotter-ui/routes/connections", ["exports", "@ember/routing/route", "@ember/service"], function (_exports, _route, _service) {
@@ -457,6 +458,31 @@
     writable: true,
     initializer: null
   }), _class);
+});
+;define("hpotter-ui/routes/credentials", ["exports", "@ember/routing/route", "fetch"], function (_exports, _route, _fetch) {
+  "use strict";
+
+  Object.defineProperty(_exports, "__esModule", {
+    value: true
+  });
+  _exports.default = void 0;
+  0; //eaimeta@70e063a35619d71f0,"@ember/routing/route",0,"fetch"eaimeta@70e063a35619d71f
+  class CredentialsRoute extends _route.default {
+    async model() {
+      try {
+        const response = await (0, _fetch.default)('/api/credentials');
+        if (!response.ok) {
+          throw new Error('Failed to fetch credentials');
+        }
+        const data = await response.json();
+        return data || [];
+      } catch (error) {
+        console.error('Error fetching credentials:', error);
+        return [];
+      }
+    }
+  }
+  _exports.default = CredentialsRoute;
 });
 ;define("hpotter-ui/routes/map", ["exports", "@ember/routing/route", "fetch"], function (_exports, _route, _fetch) {
   "use strict";
@@ -539,6 +565,7 @@
       <nav>
         <LinkTo @route="index">Home</LinkTo>
         <LinkTo @route="connections">Connections</LinkTo>
+        <LinkTo @route="credentials">Credentials</LinkTo>
         <LinkTo @route="map">Map</LinkTo>
       </nav>
     </header>
@@ -550,8 +577,8 @@
   
   */
   {
-    "id": "580fi7yt",
-    "block": "[[[10,0],[14,0,\"app-container\"],[12],[1,\"\\n  \"],[10,\"header\"],[14,0,\"app-header\"],[12],[1,\"\\n    \"],[10,\"h1\"],[12],[1,\"HPotter - Honeypot Monitor\"],[13],[1,\"\\n    \"],[10,\"nav\"],[12],[1,\"\\n      \"],[8,[39,4],null,[[\"@route\"],[\"index\"]],[[\"default\"],[[[[1,\"Home\"]],[]]]]],[1,\"\\n      \"],[8,[39,4],null,[[\"@route\"],[\"connections\"]],[[\"default\"],[[[[1,\"Connections\"]],[]]]]],[1,\"\\n      \"],[8,[39,4],null,[[\"@route\"],[\"map\"]],[[\"default\"],[[[[1,\"Map\"]],[]]]]],[1,\"\\n    \"],[13],[1,\"\\n  \"],[13],[1,\"\\n\\n  \"],[10,\"main\"],[14,0,\"app-content\"],[12],[1,\"\\n    \"],[46,[28,[37,7],null,null],null,null,null],[1,\"\\n  \"],[13],[1,\"\\n\"],[13],[1,\"\\n\"]],[],false,[\"div\",\"header\",\"h1\",\"nav\",\"link-to\",\"main\",\"component\",\"-outlet\"]]",
+    "id": "rALo9Q88",
+    "block": "[[[10,0],[14,0,\"app-container\"],[12],[1,\"\\n  \"],[10,\"header\"],[14,0,\"app-header\"],[12],[1,\"\\n    \"],[10,\"h1\"],[12],[1,\"HPotter - Honeypot Monitor\"],[13],[1,\"\\n    \"],[10,\"nav\"],[12],[1,\"\\n      \"],[8,[39,4],null,[[\"@route\"],[\"index\"]],[[\"default\"],[[[[1,\"Home\"]],[]]]]],[1,\"\\n      \"],[8,[39,4],null,[[\"@route\"],[\"connections\"]],[[\"default\"],[[[[1,\"Connections\"]],[]]]]],[1,\"\\n      \"],[8,[39,4],null,[[\"@route\"],[\"credentials\"]],[[\"default\"],[[[[1,\"Credentials\"]],[]]]]],[1,\"\\n      \"],[8,[39,4],null,[[\"@route\"],[\"map\"]],[[\"default\"],[[[[1,\"Map\"]],[]]]]],[1,\"\\n    \"],[13],[1,\"\\n  \"],[13],[1,\"\\n\\n  \"],[10,\"main\"],[14,0,\"app-content\"],[12],[1,\"\\n    \"],[46,[28,[37,7],null,null],null,null,null],[1,\"\\n  \"],[13],[1,\"\\n\"],[13],[1,\"\\n\"]],[],false,[\"div\",\"header\",\"h1\",\"nav\",\"link-to\",\"main\",\"component\",\"-outlet\"]]",
     "moduleName": "hpotter-ui/templates/application.hbs",
     "isStrictMode": false
   });
@@ -612,6 +639,73 @@
     "id": "K+7+NDzc",
     "block": "[[[10,0],[14,0,\"connections-page\"],[12],[1,\"\\n  \"],[10,\"h2\"],[12],[1,\"Recent Connections\"],[13],[1,\"\\n\\n  \"],[10,0],[14,0,\"connections-list\"],[12],[1,\"\\n\"],[41,[30,1],[[[1,\"      \"],[10,\"table\"],[14,0,\"connections-table\"],[12],[1,\"\\n        \"],[10,\"thead\"],[12],[1,\"\\n          \"],[10,\"tr\"],[12],[1,\"\\n            \"],[10,\"th\"],[12],[1,\"Time\"],[13],[1,\"\\n            \"],[10,\"th\"],[12],[1,\"Source IP\"],[13],[1,\"\\n            \"],[10,\"th\"],[12],[1,\"Source Port\"],[13],[1,\"\\n            \"],[10,\"th\"],[12],[1,\"Destination\"],[13],[1,\"\\n            \"],[10,\"th\"],[12],[1,\"Container\"],[13],[1,\"\\n            \"],[10,\"th\"],[12],[1,\"Location\"],[13],[1,\"\\n          \"],[13],[1,\"\\n        \"],[13],[1,\"\\n        \"],[10,\"tbody\"],[12],[1,\"\\n\"],[42,[28,[37,9],[[28,[37,9],[[30,1]],null]],null],null,[[[1,\"            \"],[10,\"tr\"],[12],[1,\"\\n              \"],[10,\"td\"],[12],[1,[30,2,[\"created_at\"]]],[13],[1,\"\\n              \"],[10,\"td\"],[12],[1,[30,2,[\"source_address\"]]],[13],[1,\"\\n              \"],[10,\"td\"],[12],[1,[30,2,[\"source_port\"]]],[13],[1,\"\\n              \"],[10,\"td\"],[12],[1,[30,2,[\"destination_address\"]]],[1,\":\"],[1,[30,2,[\"destination_port\"]]],[13],[1,\"\\n              \"],[10,\"td\"],[12],[1,[30,2,[\"container\"]]],[13],[1,\"\\n              \"],[10,\"td\"],[12],[1,\"\\n\"],[41,[30,2,[\"latitude\"]],[[[1,\"                  \"],[1,[30,2,[\"latitude\"]]],[1,\", \"],[1,[30,2,[\"longitude\"]]],[1,\"\\n\"]],[]],[[[1,\"                  -\\n\"]],[]]],[1,\"              \"],[13],[1,\"\\n            \"],[13],[1,\"\\n\"]],[2]],null],[1,\"        \"],[13],[1,\"\\n      \"],[13],[1,\"\\n\"]],[]],[[[1,\"      \"],[10,2],[12],[1,\"No connections found.\"],[13],[1,\"\\n\"]],[]]],[1,\"  \"],[13],[1,\"\\n\"],[13],[1,\"\\n\"]],[\"@model\",\"connection\"],false,[\"div\",\"h2\",\"if\",\"table\",\"thead\",\"tr\",\"th\",\"tbody\",\"each\",\"-track-array\",\"td\",\"p\"]]",
     "moduleName": "hpotter-ui/templates/connections.hbs",
+    "isStrictMode": false
+  });
+});
+;define("hpotter-ui/templates/credentials", ["exports", "@ember/template-factory"], function (_exports, _templateFactory) {
+  "use strict";
+
+  Object.defineProperty(_exports, "__esModule", {
+    value: true
+  });
+  _exports.default = void 0;
+  0; //eaimeta@70e063a35619d71f0,"@ember/template-factory"eaimeta@70e063a35619d71f
+  var _default = _exports.default = (0, _templateFactory.createTemplateFactory)(
+  /*
+    <div class="credentials-page">
+    <div class="page-header">
+      <h2>Captured Credentials</h2>
+      <p class="page-info">
+        {{#if @model}}
+          Showing {{@model.length}} captured credential(s)
+        {{else}}
+          No credentials captured yet
+        {{/if}}
+      </p>
+    </div>
+  
+    <div class="credentials-list">
+      {{#if @model}}
+        <table class="credentials-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Username</th>
+              <th>Password</th>
+              <th>Connection ID</th>
+            </tr>
+          </thead>
+          <tbody>
+            {{#each @model as |credential|}}
+              <tr>
+                <td>{{credential.id}}</td>
+                <td>
+                  <span class="username">{{credential.username}}</span>
+                </td>
+                <td>
+                  <span class="password">{{credential.password}}</span>
+                </td>
+                <td>
+                  <a href="#" class="connection-link">{{credential.connections_id}}</a>
+                </td>
+              </tr>
+            {{/each}}
+          </tbody>
+        </table>
+      {{else}}
+        <div class="no-data-message">
+          <p>No credentials have been captured yet.</p>
+          <p class="no-data-hint">Credentials will appear here when attackers attempt to authenticate with the honeypot.</p>
+        </div>
+      {{/if}}
+    </div>
+  </div>
+  
+  */
+  {
+    "id": "06rgGSlQ",
+    "block": "[[[10,0],[14,0,\"credentials-page\"],[12],[1,\"\\n  \"],[10,0],[14,0,\"page-header\"],[12],[1,\"\\n    \"],[10,\"h2\"],[12],[1,\"Captured Credentials\"],[13],[1,\"\\n    \"],[10,2],[14,0,\"page-info\"],[12],[1,\"\\n\"],[41,[30,1],[[[1,\"        Showing \"],[1,[30,1,[\"length\"]]],[1,\" captured credential(s)\\n\"]],[]],[[[1,\"        No credentials captured yet\\n\"]],[]]],[1,\"    \"],[13],[1,\"\\n  \"],[13],[1,\"\\n\\n  \"],[10,0],[14,0,\"credentials-list\"],[12],[1,\"\\n\"],[41,[30,1],[[[1,\"      \"],[10,\"table\"],[14,0,\"credentials-table\"],[12],[1,\"\\n        \"],[10,\"thead\"],[12],[1,\"\\n          \"],[10,\"tr\"],[12],[1,\"\\n            \"],[10,\"th\"],[12],[1,\"ID\"],[13],[1,\"\\n            \"],[10,\"th\"],[12],[1,\"Username\"],[13],[1,\"\\n            \"],[10,\"th\"],[12],[1,\"Password\"],[13],[1,\"\\n            \"],[10,\"th\"],[12],[1,\"Connection ID\"],[13],[1,\"\\n          \"],[13],[1,\"\\n        \"],[13],[1,\"\\n        \"],[10,\"tbody\"],[12],[1,\"\\n\"],[42,[28,[37,10],[[28,[37,10],[[30,1]],null]],null],null,[[[1,\"            \"],[10,\"tr\"],[12],[1,\"\\n              \"],[10,\"td\"],[12],[1,[30,2,[\"id\"]]],[13],[1,\"\\n              \"],[10,\"td\"],[12],[1,\"\\n                \"],[10,1],[14,0,\"username\"],[12],[1,[30,2,[\"username\"]]],[13],[1,\"\\n              \"],[13],[1,\"\\n              \"],[10,\"td\"],[12],[1,\"\\n                \"],[10,1],[14,0,\"password\"],[12],[1,[30,2,[\"password\"]]],[13],[1,\"\\n              \"],[13],[1,\"\\n              \"],[10,\"td\"],[12],[1,\"\\n                \"],[10,3],[14,6,\"#\"],[14,0,\"connection-link\"],[12],[1,[30,2,[\"connections_id\"]]],[13],[1,\"\\n              \"],[13],[1,\"\\n            \"],[13],[1,\"\\n\"]],[2]],null],[1,\"        \"],[13],[1,\"\\n      \"],[13],[1,\"\\n\"]],[]],[[[1,\"      \"],[10,0],[14,0,\"no-data-message\"],[12],[1,\"\\n        \"],[10,2],[12],[1,\"No credentials have been captured yet.\"],[13],[1,\"\\n        \"],[10,2],[14,0,\"no-data-hint\"],[12],[1,\"Credentials will appear here when attackers attempt to authenticate with the honeypot.\"],[13],[1,\"\\n      \"],[13],[1,\"\\n\"]],[]]],[1,\"  \"],[13],[1,\"\\n\"],[13],[1,\"\\n\"]],[\"@model\",\"credential\"],false,[\"div\",\"h2\",\"p\",\"if\",\"table\",\"thead\",\"tr\",\"th\",\"tbody\",\"each\",\"-track-array\",\"td\",\"span\",\"a\"]]",
+    "moduleName": "hpotter-ui/templates/credentials.hbs",
     "isStrictMode": false
   });
 });
