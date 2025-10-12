@@ -1,9 +1,22 @@
-<div class="home-page">
-  <h2>Welcome to HPotter</h2>
-  <p>This is a honeypot monitoring interface. View recent connections and attack attempts.</p>
+<div class="map-page">
+  <div class="map-header">
+    <h2>Connection Map</h2>
+    <p class="map-info">
+      {{#if @model}}
+        Showing {{@model.length}} connection(s) with geographic data
+      {{else}}
+        No geographic data available
+      {{/if}}
+    </p>
+  </div>
 
-  <div class="quick-links">
-    <LinkTo @route="connections" class="btn btn-primary">View Connections</LinkTo>
-    <LinkTo @route="map" class="btn btn-primary">View Map</LinkTo>
+  <div class="map-container">
+    {{#if @model}}
+      <WorldMap @connections={{@model}} />
+    {{else}}
+      <div class="no-data">
+        <p>No connections with location data found.</p>
+      </div>
+    {{/if}}
   </div>
 </div>

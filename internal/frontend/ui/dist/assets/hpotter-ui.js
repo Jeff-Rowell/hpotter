@@ -428,7 +428,6 @@
     this.route('connection', {
       path: '/connection/:connection_id'
     });
-    this.route('map');
     this.route('credentials');
   });
 });
@@ -512,7 +511,7 @@
   }
   _exports.default = CredentialsRoute;
 });
-;define("hpotter-ui/routes/map", ["exports", "@ember/routing/route", "fetch"], function (_exports, _route, _fetch) {
+;define("hpotter-ui/routes/index", ["exports", "@ember/routing/route", "fetch"], function (_exports, _route, _fetch) {
   "use strict";
 
   Object.defineProperty(_exports, "__esModule", {
@@ -520,7 +519,7 @@
   });
   _exports.default = void 0;
   0; //eaimeta@70e063a35619d71f0,"@ember/routing/route",0,"fetch"eaimeta@70e063a35619d71f
-  class MapRoute extends _route.default {
+  class IndexRoute extends _route.default {
     async model() {
       // Fetch geo data from the API
       const response = await (0, _fetch.default)('/api/geo-data?limit=1000');
@@ -530,7 +529,7 @@
       return response.json();
     }
   }
-  _exports.default = MapRoute;
+  _exports.default = IndexRoute;
 });
 ;define("hpotter-ui/serializers/application", ["exports", "@ember-data/serializer/rest"], function (_exports, _rest) {
   "use strict";
@@ -594,7 +593,6 @@
         <LinkTo @route="index">Home</LinkTo>
         <LinkTo @route="connections">Connections</LinkTo>
         <LinkTo @route="credentials">Credentials</LinkTo>
-        <LinkTo @route="map">Map</LinkTo>
       </nav>
     </header>
   
@@ -605,8 +603,8 @@
   
   */
   {
-    "id": "rALo9Q88",
-    "block": "[[[10,0],[14,0,\"app-container\"],[12],[1,\"\\n  \"],[10,\"header\"],[14,0,\"app-header\"],[12],[1,\"\\n    \"],[10,\"h1\"],[12],[1,\"HPotter - Honeypot Monitor\"],[13],[1,\"\\n    \"],[10,\"nav\"],[12],[1,\"\\n      \"],[8,[39,4],null,[[\"@route\"],[\"index\"]],[[\"default\"],[[[[1,\"Home\"]],[]]]]],[1,\"\\n      \"],[8,[39,4],null,[[\"@route\"],[\"connections\"]],[[\"default\"],[[[[1,\"Connections\"]],[]]]]],[1,\"\\n      \"],[8,[39,4],null,[[\"@route\"],[\"credentials\"]],[[\"default\"],[[[[1,\"Credentials\"]],[]]]]],[1,\"\\n      \"],[8,[39,4],null,[[\"@route\"],[\"map\"]],[[\"default\"],[[[[1,\"Map\"]],[]]]]],[1,\"\\n    \"],[13],[1,\"\\n  \"],[13],[1,\"\\n\\n  \"],[10,\"main\"],[14,0,\"app-content\"],[12],[1,\"\\n    \"],[46,[28,[37,7],null,null],null,null,null],[1,\"\\n  \"],[13],[1,\"\\n\"],[13],[1,\"\\n\"]],[],false,[\"div\",\"header\",\"h1\",\"nav\",\"link-to\",\"main\",\"component\",\"-outlet\"]]",
+    "id": "O89zv4Bf",
+    "block": "[[[10,0],[14,0,\"app-container\"],[12],[1,\"\\n  \"],[10,\"header\"],[14,0,\"app-header\"],[12],[1,\"\\n    \"],[10,\"h1\"],[12],[1,\"HPotter - Honeypot Monitor\"],[13],[1,\"\\n    \"],[10,\"nav\"],[12],[1,\"\\n      \"],[8,[39,4],null,[[\"@route\"],[\"index\"]],[[\"default\"],[[[[1,\"Home\"]],[]]]]],[1,\"\\n      \"],[8,[39,4],null,[[\"@route\"],[\"connections\"]],[[\"default\"],[[[[1,\"Connections\"]],[]]]]],[1,\"\\n      \"],[8,[39,4],null,[[\"@route\"],[\"credentials\"]],[[\"default\"],[[[[1,\"Credentials\"]],[]]]]],[1,\"\\n    \"],[13],[1,\"\\n  \"],[13],[1,\"\\n\\n  \"],[10,\"main\"],[14,0,\"app-content\"],[12],[1,\"\\n    \"],[46,[28,[37,7],null,null],null,null,null],[1,\"\\n  \"],[13],[1,\"\\n\"],[13],[1,\"\\n\"]],[],false,[\"div\",\"header\",\"h1\",\"nav\",\"link-to\",\"main\",\"component\",\"-outlet\"]]",
     "moduleName": "hpotter-ui/templates/application.hbs",
     "isStrictMode": false
   });
@@ -899,34 +897,6 @@
   0; //eaimeta@70e063a35619d71f0,"@ember/template-factory"eaimeta@70e063a35619d71f
   var _default = _exports.default = (0, _templateFactory.createTemplateFactory)(
   /*
-    <div class="home-page">
-    <h2>Welcome to HPotter</h2>
-    <p>This is a honeypot monitoring interface. View recent connections and attack attempts.</p>
-  
-    <div class="quick-links">
-      <LinkTo @route="connections" class="btn btn-primary">View Connections</LinkTo>
-      <LinkTo @route="map" class="btn btn-primary">View Map</LinkTo>
-    </div>
-  </div>
-  
-  */
-  {
-    "id": "5QwOJYzS",
-    "block": "[[[10,0],[14,0,\"home-page\"],[12],[1,\"\\n  \"],[10,\"h2\"],[12],[1,\"Welcome to HPotter\"],[13],[1,\"\\n  \"],[10,2],[12],[1,\"This is a honeypot monitoring interface. View recent connections and attack attempts.\"],[13],[1,\"\\n\\n  \"],[10,0],[14,0,\"quick-links\"],[12],[1,\"\\n    \"],[8,[39,3],[[24,0,\"btn btn-primary\"]],[[\"@route\"],[\"connections\"]],[[\"default\"],[[[[1,\"View Connections\"]],[]]]]],[1,\"\\n    \"],[8,[39,3],[[24,0,\"btn btn-primary\"]],[[\"@route\"],[\"map\"]],[[\"default\"],[[[[1,\"View Map\"]],[]]]]],[1,\"\\n  \"],[13],[1,\"\\n\"],[13],[1,\"\\n\"]],[],false,[\"div\",\"h2\",\"p\",\"link-to\"]]",
-    "moduleName": "hpotter-ui/templates/index.hbs",
-    "isStrictMode": false
-  });
-});
-;define("hpotter-ui/templates/map", ["exports", "@ember/template-factory"], function (_exports, _templateFactory) {
-  "use strict";
-
-  Object.defineProperty(_exports, "__esModule", {
-    value: true
-  });
-  _exports.default = void 0;
-  0; //eaimeta@70e063a35619d71f0,"@ember/template-factory"eaimeta@70e063a35619d71f
-  var _default = _exports.default = (0, _templateFactory.createTemplateFactory)(
-  /*
     <div class="map-page">
     <div class="map-header">
       <h2>Connection Map</h2>
@@ -952,9 +922,9 @@
   
   */
   {
-    "id": "KA6IjkYs",
+    "id": "tLRkw1H/",
     "block": "[[[10,0],[14,0,\"map-page\"],[12],[1,\"\\n  \"],[10,0],[14,0,\"map-header\"],[12],[1,\"\\n    \"],[10,\"h2\"],[12],[1,\"Connection Map\"],[13],[1,\"\\n    \"],[10,2],[14,0,\"map-info\"],[12],[1,\"\\n\"],[41,[30,1],[[[1,\"        Showing \"],[1,[30,1,[\"length\"]]],[1,\" connection(s) with geographic data\\n\"]],[]],[[[1,\"        No geographic data available\\n\"]],[]]],[1,\"    \"],[13],[1,\"\\n  \"],[13],[1,\"\\n\\n  \"],[10,0],[14,0,\"map-container\"],[12],[1,\"\\n\"],[41,[30,1],[[[1,\"      \"],[8,[39,4],null,[[\"@connections\"],[[30,1]]],null],[1,\"\\n\"]],[]],[[[1,\"      \"],[10,0],[14,0,\"no-data\"],[12],[1,\"\\n        \"],[10,2],[12],[1,\"No connections with location data found.\"],[13],[1,\"\\n      \"],[13],[1,\"\\n\"]],[]]],[1,\"  \"],[13],[1,\"\\n\"],[13],[1,\"\\n\"]],[\"@model\"],false,[\"div\",\"h2\",\"p\",\"if\",\"world-map\"]]",
-    "moduleName": "hpotter-ui/templates/map.hbs",
+    "moduleName": "hpotter-ui/templates/index.hbs",
     "isStrictMode": false
   });
 });

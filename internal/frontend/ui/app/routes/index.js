@@ -1,7 +1,7 @@
 import Route from '@ember/routing/route';
 import fetch from 'fetch';
 
-export default class MapRoute extends Route {
+export default class IndexRoute extends Route {
   async model() {
     // Fetch geo data from the API
     const response = await fetch('/api/geo-data?limit=1000');
