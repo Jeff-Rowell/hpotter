@@ -6,17 +6,20 @@
       <table class="connections-table">
         <thead>
           <tr>
+            <th>ID</th>
             <th>Time</th>
             <th>Source IP</th>
             <th>Source Port</th>
             <th>Destination</th>
             <th>Container</th>
             <th>Location</th>
+            <th>Actions</th>
           </tr>
         </thead>
         <tbody>
           {{#each @model as |connection|}}
             <tr>
+              <td>{{connection.id}}</td>
               <td>{{connection.created_at}}</td>
               <td>{{connection.source_address}}</td>
               <td>{{connection.source_port}}</td>
@@ -28,6 +31,11 @@
                 {{else}}
                   -
                 {{/if}}
+              </td>
+              <td>
+                <LinkTo @route="connection" @model={{connection.id}} class="view-details-btn">
+                  View Details
+                </LinkTo>
               </td>
             </tr>
           {{/each}}

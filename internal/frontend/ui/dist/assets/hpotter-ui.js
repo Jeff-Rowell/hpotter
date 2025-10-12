@@ -425,9 +425,37 @@
   _exports.default = Router;
   Router.map(function () {
     this.route('connections');
+    this.route('connection', {
+      path: '/connection/:connection_id'
+    });
     this.route('map');
     this.route('credentials');
   });
+});
+;define("hpotter-ui/routes/connection", ["exports", "@ember/routing/route", "fetch"], function (_exports, _route, _fetch) {
+  "use strict";
+
+  Object.defineProperty(_exports, "__esModule", {
+    value: true
+  });
+  _exports.default = void 0;
+  0; //eaimeta@70e063a35619d71f0,"@ember/routing/route",0,"fetch"eaimeta@70e063a35619d71f
+  class ConnectionRoute extends _route.default {
+    async model(params) {
+      try {
+        const response = await (0, _fetch.default)(`/api/connection?id=${params.connection_id}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch connection details');
+        }
+        const data = await response.json();
+        return data;
+      } catch (error) {
+        console.error('Error fetching connection details:', error);
+        return null;
+      }
+    }
+  }
+  _exports.default = ConnectionRoute;
 });
 ;define("hpotter-ui/routes/connections", ["exports", "@ember/routing/route", "@ember/service"], function (_exports, _route, _service) {
   "use strict";
@@ -583,6 +611,144 @@
     "isStrictMode": false
   });
 });
+;define("hpotter-ui/templates/connection", ["exports", "@ember/template-factory"], function (_exports, _templateFactory) {
+  "use strict";
+
+  Object.defineProperty(_exports, "__esModule", {
+    value: true
+  });
+  _exports.default = void 0;
+  0; //eaimeta@70e063a35619d71f0,"@ember/template-factory"eaimeta@70e063a35619d71f
+  var _default = _exports.default = (0, _templateFactory.createTemplateFactory)(
+  /*
+    <div class="connection-detail-page">
+    {{#if @model}}
+      <div class="detail-header-section">
+        <h2>Connection Details - ID {{@model.id}}</h2>
+        <LinkTo @route="connections" class="back-link">← Back to Connections</LinkTo>
+      </div>
+  
+      <div class="detail-sections">
+        <div class="detail-card">
+          <h3>Connection Information</h3>
+          <div class="detail-grid">
+            <div class="detail-item">
+              <span class="label">ID:</span>
+              <span class="value">{{@model.id}}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Created At:</span>
+              <span class="value">{{@model.created_at}}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Source Address:</span>
+              <span class="value">{{@model.source_address}}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Source Port:</span>
+              <span class="value">{{@model.source_port}}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Destination Address:</span>
+              <span class="value">{{@model.destination_address}}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Destination Port:</span>
+              <span class="value">{{@model.destination_port}}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Container:</span>
+              <span class="value">{{@model.container}}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Protocol:</span>
+              <span class="value">{{@model.proto}}</span>
+            </div>
+            <div class="detail-item">
+              <span class="label">Location:</span>
+              <span class="value">
+                {{#if @model.latitude}}
+                  {{@model.latitude}}, {{@model.longitude}}
+                {{else}}
+                  Not available
+                {{/if}}
+              </span>
+            </div>
+          </div>
+        </div>
+  
+        {{#if @model.credentials}}
+          <div class="detail-card credentials-card">
+            <h3>🔑 Captured Credentials</h3>
+            {{#if @model.credentials.length}}
+              <table class="credentials-detail-table">
+                <thead>
+                  <tr>
+                    <th>ID</th>
+                    <th>Username</th>
+                    <th>Password</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {{#each @model.credentials as |credential|}}
+                    <tr>
+                      <td>{{credential.id}}</td>
+                      <td><span class="username">{{credential.username}}</span></td>
+                      <td><span class="password">{{credential.password}}</span></td>
+                    </tr>
+                  {{/each}}
+                </tbody>
+              </table>
+            {{else}}
+              <p class="no-credentials">No credentials captured for this connection.</p>
+            {{/if}}
+          </div>
+        {{/if}}
+  
+        {{#if @model.data}}
+          <div class="detail-card data-card">
+            <h3>📊 Payload Data</h3>
+            {{#if @model.data.length}}
+              <div class="data-entries">
+                {{#each @model.data as |dataEntry|}}
+                  <div class="data-entry">
+                    <div class="data-header">
+                      <span class="data-direction {{dataEntry.direction}}">
+                        {{#if (eq dataEntry.direction "inbound")}}
+                          ⬇️ Inbound
+                        {{else}}
+                          ⬆️ Outbound
+                        {{/if}}
+                      </span>
+                      <span class="data-id">ID: {{dataEntry.id}}</span>
+                    </div>
+                    <pre class="data-content">{{dataEntry.data}}</pre>
+                  </div>
+                {{/each}}
+              </div>
+            {{else}}
+              <p class="no-data">No payload data captured for this connection.</p>
+            {{/if}}
+          </div>
+        {{/if}}
+      </div>
+    {{else}}
+      <div class="error-message">
+        <h2>Connection Not Found</h2>
+        <p>The connection you're looking for doesn't exist or couldn't be loaded.</p>
+        <LinkTo @route="connections" class="back-link">← Back to Connections</LinkTo>
+      </div>
+    {{/if}}
+  </div>
+  
+  */
+  {
+    "id": "1M+9eQml",
+    "block": "[[[10,0],[14,0,\"connection-detail-page\"],[12],[1,\"\\n\"],[41,[30,1],[[[1,\"    \"],[10,0],[14,0,\"detail-header-section\"],[12],[1,\"\\n      \"],[10,\"h2\"],[12],[1,\"Connection Details - ID \"],[1,[30,1,[\"id\"]]],[13],[1,\"\\n      \"],[8,[39,3],[[24,0,\"back-link\"]],[[\"@route\"],[\"connections\"]],[[\"default\"],[[[[1,\"← Back to Connections\"]],[]]]]],[1,\"\\n    \"],[13],[1,\"\\n\\n    \"],[10,0],[14,0,\"detail-sections\"],[12],[1,\"\\n      \"],[10,0],[14,0,\"detail-card\"],[12],[1,\"\\n        \"],[10,\"h3\"],[12],[1,\"Connection Information\"],[13],[1,\"\\n        \"],[10,0],[14,0,\"detail-grid\"],[12],[1,\"\\n          \"],[10,0],[14,0,\"detail-item\"],[12],[1,\"\\n            \"],[10,1],[14,0,\"label\"],[12],[1,\"ID:\"],[13],[1,\"\\n            \"],[10,1],[14,0,\"value\"],[12],[1,[30,1,[\"id\"]]],[13],[1,\"\\n          \"],[13],[1,\"\\n          \"],[10,0],[14,0,\"detail-item\"],[12],[1,\"\\n            \"],[10,1],[14,0,\"label\"],[12],[1,\"Created At:\"],[13],[1,\"\\n            \"],[10,1],[14,0,\"value\"],[12],[1,[30,1,[\"created_at\"]]],[13],[1,\"\\n          \"],[13],[1,\"\\n          \"],[10,0],[14,0,\"detail-item\"],[12],[1,\"\\n            \"],[10,1],[14,0,\"label\"],[12],[1,\"Source Address:\"],[13],[1,\"\\n            \"],[10,1],[14,0,\"value\"],[12],[1,[30,1,[\"source_address\"]]],[13],[1,\"\\n          \"],[13],[1,\"\\n          \"],[10,0],[14,0,\"detail-item\"],[12],[1,\"\\n            \"],[10,1],[14,0,\"label\"],[12],[1,\"Source Port:\"],[13],[1,\"\\n            \"],[10,1],[14,0,\"value\"],[12],[1,[30,1,[\"source_port\"]]],[13],[1,\"\\n          \"],[13],[1,\"\\n          \"],[10,0],[14,0,\"detail-item\"],[12],[1,\"\\n            \"],[10,1],[14,0,\"label\"],[12],[1,\"Destination Address:\"],[13],[1,\"\\n            \"],[10,1],[14,0,\"value\"],[12],[1,[30,1,[\"destination_address\"]]],[13],[1,\"\\n          \"],[13],[1,\"\\n          \"],[10,0],[14,0,\"detail-item\"],[12],[1,\"\\n            \"],[10,1],[14,0,\"label\"],[12],[1,\"Destination Port:\"],[13],[1,\"\\n            \"],[10,1],[14,0,\"value\"],[12],[1,[30,1,[\"destination_port\"]]],[13],[1,\"\\n          \"],[13],[1,\"\\n          \"],[10,0],[14,0,\"detail-item\"],[12],[1,\"\\n            \"],[10,1],[14,0,\"label\"],[12],[1,\"Container:\"],[13],[1,\"\\n            \"],[10,1],[14,0,\"value\"],[12],[1,[30,1,[\"container\"]]],[13],[1,\"\\n          \"],[13],[1,\"\\n          \"],[10,0],[14,0,\"detail-item\"],[12],[1,\"\\n            \"],[10,1],[14,0,\"label\"],[12],[1,\"Protocol:\"],[13],[1,\"\\n            \"],[10,1],[14,0,\"value\"],[12],[1,[30,1,[\"proto\"]]],[13],[1,\"\\n          \"],[13],[1,\"\\n          \"],[10,0],[14,0,\"detail-item\"],[12],[1,\"\\n            \"],[10,1],[14,0,\"label\"],[12],[1,\"Location:\"],[13],[1,\"\\n            \"],[10,1],[14,0,\"value\"],[12],[1,\"\\n\"],[41,[30,1,[\"latitude\"]],[[[1,\"                \"],[1,[30,1,[\"latitude\"]]],[1,\", \"],[1,[30,1,[\"longitude\"]]],[1,\"\\n\"]],[]],[[[1,\"                Not available\\n\"]],[]]],[1,\"            \"],[13],[1,\"\\n          \"],[13],[1,\"\\n        \"],[13],[1,\"\\n      \"],[13],[1,\"\\n\\n\"],[41,[30,1,[\"credentials\"]],[[[1,\"        \"],[10,0],[14,0,\"detail-card credentials-card\"],[12],[1,\"\\n          \"],[10,\"h3\"],[12],[1,\"🔑 Captured Credentials\"],[13],[1,\"\\n\"],[41,[30,1,[\"credentials\",\"length\"]],[[[1,\"            \"],[10,\"table\"],[14,0,\"credentials-detail-table\"],[12],[1,\"\\n              \"],[10,\"thead\"],[12],[1,\"\\n                \"],[10,\"tr\"],[12],[1,\"\\n                  \"],[10,\"th\"],[12],[1,\"ID\"],[13],[1,\"\\n                  \"],[10,\"th\"],[12],[1,\"Username\"],[13],[1,\"\\n                  \"],[10,\"th\"],[12],[1,\"Password\"],[13],[1,\"\\n                \"],[13],[1,\"\\n              \"],[13],[1,\"\\n              \"],[10,\"tbody\"],[12],[1,\"\\n\"],[42,[28,[37,12],[[28,[37,12],[[30,1,[\"credentials\"]]],null]],null],null,[[[1,\"                  \"],[10,\"tr\"],[12],[1,\"\\n                    \"],[10,\"td\"],[12],[1,[30,2,[\"id\"]]],[13],[1,\"\\n                    \"],[10,\"td\"],[12],[10,1],[14,0,\"username\"],[12],[1,[30,2,[\"username\"]]],[13],[13],[1,\"\\n                    \"],[10,\"td\"],[12],[10,1],[14,0,\"password\"],[12],[1,[30,2,[\"password\"]]],[13],[13],[1,\"\\n                  \"],[13],[1,\"\\n\"]],[2]],null],[1,\"              \"],[13],[1,\"\\n            \"],[13],[1,\"\\n\"]],[]],[[[1,\"            \"],[10,2],[14,0,\"no-credentials\"],[12],[1,\"No credentials captured for this connection.\"],[13],[1,\"\\n\"]],[]]],[1,\"        \"],[13],[1,\"\\n\"]],[]],null],[1,\"\\n\"],[41,[30,1,[\"data\"]],[[[1,\"        \"],[10,0],[14,0,\"detail-card data-card\"],[12],[1,\"\\n          \"],[10,\"h3\"],[12],[1,\"📊 Payload Data\"],[13],[1,\"\\n\"],[41,[30,1,[\"data\",\"length\"]],[[[1,\"            \"],[10,0],[14,0,\"data-entries\"],[12],[1,\"\\n\"],[42,[28,[37,12],[[28,[37,12],[[30,1,[\"data\"]]],null]],null],null,[[[1,\"                \"],[10,0],[14,0,\"data-entry\"],[12],[1,\"\\n                  \"],[10,0],[14,0,\"data-header\"],[12],[1,\"\\n                    \"],[10,1],[15,0,[29,[\"data-direction \",[30,3,[\"direction\"]]]]],[12],[1,\"\\n\"],[41,[28,[37,15],[[30,3,[\"direction\"]],\"inbound\"],null],[[[1,\"                        ⬇️ Inbound\\n\"]],[]],[[[1,\"                        ⬆️ Outbound\\n\"]],[]]],[1,\"                    \"],[13],[1,\"\\n                    \"],[10,1],[14,0,\"data-id\"],[12],[1,\"ID: \"],[1,[30,3,[\"id\"]]],[13],[1,\"\\n                  \"],[13],[1,\"\\n                  \"],[10,\"pre\"],[14,0,\"data-content\"],[12],[1,[30,3,[\"data\"]]],[13],[1,\"\\n                \"],[13],[1,\"\\n\"]],[3]],null],[1,\"            \"],[13],[1,\"\\n\"]],[]],[[[1,\"            \"],[10,2],[14,0,\"no-data\"],[12],[1,\"No payload data captured for this connection.\"],[13],[1,\"\\n\"]],[]]],[1,\"        \"],[13],[1,\"\\n\"]],[]],null],[1,\"    \"],[13],[1,\"\\n\"]],[]],[[[1,\"    \"],[10,0],[14,0,\"error-message\"],[12],[1,\"\\n      \"],[10,\"h2\"],[12],[1,\"Connection Not Found\"],[13],[1,\"\\n      \"],[10,2],[12],[1,\"The connection you're looking for doesn't exist or couldn't be loaded.\"],[13],[1,\"\\n      \"],[8,[39,3],[[24,0,\"back-link\"]],[[\"@route\"],[\"connections\"]],[[\"default\"],[[[[1,\"← Back to Connections\"]],[]]]]],[1,\"\\n    \"],[13],[1,\"\\n\"]],[]]],[13],[1,\"\\n\"]],[\"@model\",\"credential\",\"dataEntry\"],false,[\"div\",\"if\",\"h2\",\"link-to\",\"h3\",\"span\",\"table\",\"thead\",\"tr\",\"th\",\"tbody\",\"each\",\"-track-array\",\"td\",\"p\",\"eq\",\"pre\"]]",
+    "moduleName": "hpotter-ui/templates/connection.hbs",
+    "isStrictMode": false
+  });
+});
 ;define("hpotter-ui/templates/connections", ["exports", "@ember/template-factory"], function (_exports, _templateFactory) {
   "use strict";
 
@@ -601,17 +767,20 @@
         <table class="connections-table">
           <thead>
             <tr>
+              <th>ID</th>
               <th>Time</th>
               <th>Source IP</th>
               <th>Source Port</th>
               <th>Destination</th>
               <th>Container</th>
               <th>Location</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
             {{#each @model as |connection|}}
               <tr>
+                <td>{{connection.id}}</td>
                 <td>{{connection.created_at}}</td>
                 <td>{{connection.source_address}}</td>
                 <td>{{connection.source_port}}</td>
@@ -623,6 +792,11 @@
                   {{else}}
                     -
                   {{/if}}
+                </td>
+                <td>
+                  <LinkTo @route="connection" @model={{connection.id}} class="view-details-btn">
+                    View Details
+                  </LinkTo>
                 </td>
               </tr>
             {{/each}}
@@ -636,8 +810,8 @@
   
   */
   {
-    "id": "K+7+NDzc",
-    "block": "[[[10,0],[14,0,\"connections-page\"],[12],[1,\"\\n  \"],[10,\"h2\"],[12],[1,\"Recent Connections\"],[13],[1,\"\\n\\n  \"],[10,0],[14,0,\"connections-list\"],[12],[1,\"\\n\"],[41,[30,1],[[[1,\"      \"],[10,\"table\"],[14,0,\"connections-table\"],[12],[1,\"\\n        \"],[10,\"thead\"],[12],[1,\"\\n          \"],[10,\"tr\"],[12],[1,\"\\n            \"],[10,\"th\"],[12],[1,\"Time\"],[13],[1,\"\\n            \"],[10,\"th\"],[12],[1,\"Source IP\"],[13],[1,\"\\n            \"],[10,\"th\"],[12],[1,\"Source Port\"],[13],[1,\"\\n            \"],[10,\"th\"],[12],[1,\"Destination\"],[13],[1,\"\\n            \"],[10,\"th\"],[12],[1,\"Container\"],[13],[1,\"\\n            \"],[10,\"th\"],[12],[1,\"Location\"],[13],[1,\"\\n          \"],[13],[1,\"\\n        \"],[13],[1,\"\\n        \"],[10,\"tbody\"],[12],[1,\"\\n\"],[42,[28,[37,9],[[28,[37,9],[[30,1]],null]],null],null,[[[1,\"            \"],[10,\"tr\"],[12],[1,\"\\n              \"],[10,\"td\"],[12],[1,[30,2,[\"created_at\"]]],[13],[1,\"\\n              \"],[10,\"td\"],[12],[1,[30,2,[\"source_address\"]]],[13],[1,\"\\n              \"],[10,\"td\"],[12],[1,[30,2,[\"source_port\"]]],[13],[1,\"\\n              \"],[10,\"td\"],[12],[1,[30,2,[\"destination_address\"]]],[1,\":\"],[1,[30,2,[\"destination_port\"]]],[13],[1,\"\\n              \"],[10,\"td\"],[12],[1,[30,2,[\"container\"]]],[13],[1,\"\\n              \"],[10,\"td\"],[12],[1,\"\\n\"],[41,[30,2,[\"latitude\"]],[[[1,\"                  \"],[1,[30,2,[\"latitude\"]]],[1,\", \"],[1,[30,2,[\"longitude\"]]],[1,\"\\n\"]],[]],[[[1,\"                  -\\n\"]],[]]],[1,\"              \"],[13],[1,\"\\n            \"],[13],[1,\"\\n\"]],[2]],null],[1,\"        \"],[13],[1,\"\\n      \"],[13],[1,\"\\n\"]],[]],[[[1,\"      \"],[10,2],[12],[1,\"No connections found.\"],[13],[1,\"\\n\"]],[]]],[1,\"  \"],[13],[1,\"\\n\"],[13],[1,\"\\n\"]],[\"@model\",\"connection\"],false,[\"div\",\"h2\",\"if\",\"table\",\"thead\",\"tr\",\"th\",\"tbody\",\"each\",\"-track-array\",\"td\",\"p\"]]",
+    "id": "+QWpBJpz",
+    "block": "[[[10,0],[14,0,\"connections-page\"],[12],[1,\"\\n  \"],[10,\"h2\"],[12],[1,\"Recent Connections\"],[13],[1,\"\\n\\n  \"],[10,0],[14,0,\"connections-list\"],[12],[1,\"\\n\"],[41,[30,1],[[[1,\"      \"],[10,\"table\"],[14,0,\"connections-table\"],[12],[1,\"\\n        \"],[10,\"thead\"],[12],[1,\"\\n          \"],[10,\"tr\"],[12],[1,\"\\n            \"],[10,\"th\"],[12],[1,\"ID\"],[13],[1,\"\\n            \"],[10,\"th\"],[12],[1,\"Time\"],[13],[1,\"\\n            \"],[10,\"th\"],[12],[1,\"Source IP\"],[13],[1,\"\\n            \"],[10,\"th\"],[12],[1,\"Source Port\"],[13],[1,\"\\n            \"],[10,\"th\"],[12],[1,\"Destination\"],[13],[1,\"\\n            \"],[10,\"th\"],[12],[1,\"Container\"],[13],[1,\"\\n            \"],[10,\"th\"],[12],[1,\"Location\"],[13],[1,\"\\n            \"],[10,\"th\"],[12],[1,\"Actions\"],[13],[1,\"\\n          \"],[13],[1,\"\\n        \"],[13],[1,\"\\n        \"],[10,\"tbody\"],[12],[1,\"\\n\"],[42,[28,[37,9],[[28,[37,9],[[30,1]],null]],null],null,[[[1,\"            \"],[10,\"tr\"],[12],[1,\"\\n              \"],[10,\"td\"],[12],[1,[30,2,[\"id\"]]],[13],[1,\"\\n              \"],[10,\"td\"],[12],[1,[30,2,[\"created_at\"]]],[13],[1,\"\\n              \"],[10,\"td\"],[12],[1,[30,2,[\"source_address\"]]],[13],[1,\"\\n              \"],[10,\"td\"],[12],[1,[30,2,[\"source_port\"]]],[13],[1,\"\\n              \"],[10,\"td\"],[12],[1,[30,2,[\"destination_address\"]]],[1,\":\"],[1,[30,2,[\"destination_port\"]]],[13],[1,\"\\n              \"],[10,\"td\"],[12],[1,[30,2,[\"container\"]]],[13],[1,\"\\n              \"],[10,\"td\"],[12],[1,\"\\n\"],[41,[30,2,[\"latitude\"]],[[[1,\"                  \"],[1,[30,2,[\"latitude\"]]],[1,\", \"],[1,[30,2,[\"longitude\"]]],[1,\"\\n\"]],[]],[[[1,\"                  -\\n\"]],[]]],[1,\"              \"],[13],[1,\"\\n              \"],[10,\"td\"],[12],[1,\"\\n                \"],[8,[39,11],[[24,0,\"view-details-btn\"]],[[\"@route\",\"@model\"],[\"connection\",[30,2,[\"id\"]]]],[[\"default\"],[[[[1,\"\\n                  View Details\\n                \"]],[]]]]],[1,\"\\n              \"],[13],[1,\"\\n            \"],[13],[1,\"\\n\"]],[2]],null],[1,\"        \"],[13],[1,\"\\n      \"],[13],[1,\"\\n\"]],[]],[[[1,\"      \"],[10,2],[12],[1,\"No connections found.\"],[13],[1,\"\\n\"]],[]]],[1,\"  \"],[13],[1,\"\\n\"],[13],[1,\"\\n\"]],[\"@model\",\"connection\"],false,[\"div\",\"h2\",\"if\",\"table\",\"thead\",\"tr\",\"th\",\"tbody\",\"each\",\"-track-array\",\"td\",\"link-to\",\"p\"]]",
     "moduleName": "hpotter-ui/templates/connections.hbs",
     "isStrictMode": false
   });
