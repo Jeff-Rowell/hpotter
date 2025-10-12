@@ -54,9 +54,9 @@
         </div>
       </div>
 
-      {{#if @model.credentials}}
-        <div class="detail-card credentials-card">
-          <h3>🔑 Captured Credentials</h3>
+      <div class="detail-card credentials-card">
+        <h3>Captured Credentials</h3>
+        {{#if @model.credentials}}
           {{#if @model.credentials.length}}
             <table class="credentials-detail-table">
               <thead>
@@ -79,12 +79,14 @@
           {{else}}
             <p class="no-credentials">No credentials captured for this connection.</p>
           {{/if}}
-        </div>
-      {{/if}}
+        {{else}}
+          <p class="no-credentials">No credentials captured for this connection.</p>
+        {{/if}}
+      </div>
 
-      {{#if @model.data}}
-        <div class="detail-card data-card">
-          <h3>📊 Payload Data</h3>
+      <div class="detail-card data-card">
+        <h3>Payload Data</h3>
+        {{#if @model.data}}
           {{#if @model.data.length}}
             <div class="data-entries">
               {{#each @model.data as |dataEntry|}}
@@ -92,9 +94,9 @@
                   <div class="data-header">
                     <span class="data-direction {{dataEntry.direction}}">
                       {{#if (eq dataEntry.direction "inbound")}}
-                        ⬇️ Inbound
+                        Inbound
                       {{else}}
-                        ⬆️ Outbound
+                        Outbound
                       {{/if}}
                     </span>
                     <span class="data-id">ID: {{dataEntry.id}}</span>
@@ -106,8 +108,10 @@
           {{else}}
             <p class="no-data">No payload data captured for this connection.</p>
           {{/if}}
-        </div>
-      {{/if}}
+        {{else}}
+          <p class="no-data">No payload data captured for this connection.</p>
+        {{/if}}
+      </div>
     </div>
   {{else}}
     <div class="error-message">
