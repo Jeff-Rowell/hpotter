@@ -1,8 +1,23 @@
 <div class="connections-page">
-  <h2>Recent Connections</h2>
+  <div class="page-header-with-controls">
+    <h2>Recent Connections</h2>
+    <div class="page-size-control">
+      <label for="pageSize">Show:</label>
+      <select id="pageSize" {{on "change" this.changePageSize}} class="page-size-select" value={{this.pageSize}}>
+        {{#each this.pageSizeOptions as |size|}}
+          <option value={{size}}>{{size}}</option>
+        {{/each}}
+      </select>
+      <span class="per-page-label">per page</span>
+    </div>
+  </div>
 
   <div class="connections-list">
-    {{#if @model}}
+    {{#if this.isLoading}}
+      <div class="loading-indicator">
+        <p>Loading connections...</p>
+      </div>
+    {{else if this.connections}}
       <table class="connections-table">
         <thead>
           <tr>
@@ -17,7 +32,7 @@
           </tr>
         </thead>
         <tbody>
-          {{#each @model as |connection|}}
+          {{#each this.connections as |connection|}}
             <tr>
               <td>{{connection.id}}</td>
               <td>{{connection.created_at}}</td>
@@ -41,6 +56,31 @@
           {{/each}}
         </tbody>
       </table>
+
+      <div class="pagination-controls">
+        <div class="pagination-info">
+          Showing {{this.startRecord}} - {{this.endRecord}} of {{this.totalCount}} connections
+        </div>
+        <div class="pagination-buttons">
+          <button
+            type="button"
+            class="pagination-btn"
+            disabled={{this.disablePreviousPage}}
+            {{on "click" this.previousPage}}
+          >
+            Previous
+          </button>
+          <span class="page-indicator">Page {{this.currentPage}} of {{this.totalPages}}</span>
+          <button
+            type="button"
+            class="pagination-btn"
+            disabled={{this.disableNextPage}}
+            {{on "click" this.nextPage}}
+          >
+            Next
+          </button>
+        </div>
+      </div>
     {{else}}
       <p>No connections found.</p>
     {{/if}}

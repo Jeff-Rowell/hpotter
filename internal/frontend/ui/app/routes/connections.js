@@ -1,10 +1,8 @@
 import Route from '@ember/routing/route';
-import { service } from '@ember/service';
 
 export default class ConnectionsRoute extends Route {
-  @service store;
-
-  async model() {
-    return this.store.findAll('connection');
+  async setupController(controller) {
+    super.setupController(...arguments);
+    await controller.fetchConnections();
   }
 }

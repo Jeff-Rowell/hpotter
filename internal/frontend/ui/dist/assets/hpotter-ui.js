@@ -250,6 +250,139 @@
   });
   0; //eaimeta@70e063a35619d71f0,"ember-resolver/container-debug-adapter"eaimeta@70e063a35619d71f
 });
+;define("hpotter-ui/controllers/connections", ["exports", "@ember/controller", "@glimmer/tracking", "@ember/object", "fetch"], function (_exports, _controller, _tracking, _object, _fetch) {
+  "use strict";
+
+  Object.defineProperty(_exports, "__esModule", {
+    value: true
+  });
+  _exports.default = void 0;
+  var _class, _descriptor, _descriptor2, _descriptor3, _descriptor4, _descriptor5;
+  0; //eaimeta@70e063a35619d71f0,"@ember/controller",0,"@glimmer/tracking",0,"@ember/object",0,"fetch"eaimeta@70e063a35619d71f
+  function _initializerDefineProperty(e, i, r, l) { r && Object.defineProperty(e, i, { enumerable: r.enumerable, configurable: r.configurable, writable: r.writable, value: r.initializer ? r.initializer.call(l) : void 0 }); }
+  function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+  function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == typeof i ? i : i + ""; }
+  function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+  function _applyDecoratedDescriptor(i, e, r, n, l) { var a = {}; return Object.keys(n).forEach(function (i) { a[i] = n[i]; }), a.enumerable = !!a.enumerable, a.configurable = !!a.configurable, ("value" in a || a.initializer) && (a.writable = !0), a = r.slice().reverse().reduce(function (r, n) { return n(i, e, r) || r; }, a), l && void 0 !== a.initializer && (a.value = a.initializer ? a.initializer.call(l) : void 0, a.initializer = void 0), void 0 === a.initializer ? (Object.defineProperty(i, e, a), null) : a; }
+  function _initializerWarningHelper(r, e) { throw Error("Decorating class property failed. Please ensure that transform-class-properties is enabled and runs after the decorators transform."); }
+  let ConnectionsController = _exports.default = (_class = class ConnectionsController extends _controller.default {
+    constructor(...args) {
+      super(...args);
+      _initializerDefineProperty(this, "connections", _descriptor, this);
+      _initializerDefineProperty(this, "currentPage", _descriptor2, this);
+      _initializerDefineProperty(this, "pageSize", _descriptor3, this);
+      _initializerDefineProperty(this, "totalCount", _descriptor4, this);
+      _initializerDefineProperty(this, "isLoading", _descriptor5, this);
+      _defineProperty(this, "pageSizeOptions", [10, 25, 50]);
+    }
+    get totalPages() {
+      return Math.ceil(this.totalCount / this.pageSize);
+    }
+    get offset() {
+      return (this.currentPage - 1) * this.pageSize;
+    }
+    get hasNextPage() {
+      return this.currentPage < this.totalPages;
+    }
+    get hasPreviousPage() {
+      return this.currentPage > 1;
+    }
+    get disableNextPage() {
+      return !this.hasNextPage;
+    }
+    get disablePreviousPage() {
+      return !this.hasPreviousPage;
+    }
+    get startRecord() {
+      return this.offset + 1;
+    }
+    get endRecord() {
+      const end = this.offset + this.pageSize;
+      return end > this.totalCount ? this.totalCount : end;
+    }
+    async fetchConnections() {
+      this.isLoading = true;
+      try {
+        const response = await (0, _fetch.default)(`/api/connections?limit=${this.pageSize}&offset=${this.offset}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch connections');
+        }
+        const data = await response.json();
+        this.connections = data || [];
+
+        // Fetch total count
+        const countResponse = await (0, _fetch.default)('/api/connections');
+        if (countResponse.ok) {
+          const allData = await countResponse.json();
+          this.totalCount = allData.length;
+        }
+      } catch (error) {
+        console.error('Error fetching connections:', error);
+        this.connections = [];
+      } finally {
+        this.isLoading = false;
+      }
+    }
+    async changePageSize(event) {
+      this.pageSize = parseInt(event.target.value);
+      this.currentPage = 1;
+      await this.fetchConnections();
+    }
+    async goToPage(page) {
+      if (page >= 1 && page <= this.totalPages) {
+        this.currentPage = page;
+        await this.fetchConnections();
+      }
+    }
+    async nextPage() {
+      if (this.hasNextPage) {
+        this.currentPage++;
+        await this.fetchConnections();
+      }
+    }
+    async previousPage() {
+      if (this.hasPreviousPage) {
+        this.currentPage--;
+        await this.fetchConnections();
+      }
+    }
+  }, _descriptor = _applyDecoratedDescriptor(_class.prototype, "connections", [_tracking.tracked], {
+    configurable: true,
+    enumerable: true,
+    writable: true,
+    initializer: function () {
+      return [];
+    }
+  }), _descriptor2 = _applyDecoratedDescriptor(_class.prototype, "currentPage", [_tracking.tracked], {
+    configurable: true,
+    enumerable: true,
+    writable: true,
+    initializer: function () {
+      return 1;
+    }
+  }), _descriptor3 = _applyDecoratedDescriptor(_class.prototype, "pageSize", [_tracking.tracked], {
+    configurable: true,
+    enumerable: true,
+    writable: true,
+    initializer: function () {
+      return 10;
+    }
+  }), _descriptor4 = _applyDecoratedDescriptor(_class.prototype, "totalCount", [_tracking.tracked], {
+    configurable: true,
+    enumerable: true,
+    writable: true,
+    initializer: function () {
+      return 0;
+    }
+  }), _descriptor5 = _applyDecoratedDescriptor(_class.prototype, "isLoading", [_tracking.tracked], {
+    configurable: true,
+    enumerable: true,
+    writable: true,
+    initializer: function () {
+      return false;
+    }
+  }), _applyDecoratedDescriptor(_class.prototype, "changePageSize", [_object.action], Object.getOwnPropertyDescriptor(_class.prototype, "changePageSize"), _class.prototype), _applyDecoratedDescriptor(_class.prototype, "goToPage", [_object.action], Object.getOwnPropertyDescriptor(_class.prototype, "goToPage"), _class.prototype), _applyDecoratedDescriptor(_class.prototype, "nextPage", [_object.action], Object.getOwnPropertyDescriptor(_class.prototype, "nextPage"), _class.prototype), _applyDecoratedDescriptor(_class.prototype, "previousPage", [_object.action], Object.getOwnPropertyDescriptor(_class.prototype, "previousPage"), _class.prototype), _class);
+});
 ;define("hpotter-ui/data-adapter", ["exports", "@ember-data/debug/data-adapter"], function (_exports, _dataAdapter) {
   "use strict";
 
@@ -456,35 +589,21 @@
   }
   _exports.default = ConnectionRoute;
 });
-;define("hpotter-ui/routes/connections", ["exports", "@ember/routing/route", "@ember/service"], function (_exports, _route, _service) {
+;define("hpotter-ui/routes/connections", ["exports", "@ember/routing/route"], function (_exports, _route) {
   "use strict";
 
   Object.defineProperty(_exports, "__esModule", {
     value: true
   });
   _exports.default = void 0;
-  var _class, _descriptor;
-  0; //eaimeta@70e063a35619d71f0,"@ember/routing/route",0,"@ember/service"eaimeta@70e063a35619d71f
-  function _initializerDefineProperty(e, i, r, l) { r && Object.defineProperty(e, i, { enumerable: r.enumerable, configurable: r.configurable, writable: r.writable, value: r.initializer ? r.initializer.call(l) : void 0 }); }
-  function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
-  function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == typeof i ? i : i + ""; }
-  function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
-  function _applyDecoratedDescriptor(i, e, r, n, l) { var a = {}; return Object.keys(n).forEach(function (i) { a[i] = n[i]; }), a.enumerable = !!a.enumerable, a.configurable = !!a.configurable, ("value" in a || a.initializer) && (a.writable = !0), a = r.slice().reverse().reduce(function (r, n) { return n(i, e, r) || r; }, a), l && void 0 !== a.initializer && (a.value = a.initializer ? a.initializer.call(l) : void 0, a.initializer = void 0), void 0 === a.initializer ? (Object.defineProperty(i, e, a), null) : a; }
-  function _initializerWarningHelper(r, e) { throw Error("Decorating class property failed. Please ensure that transform-class-properties is enabled and runs after the decorators transform."); }
-  let ConnectionsRoute = _exports.default = (_class = class ConnectionsRoute extends _route.default {
-    constructor(...args) {
-      super(...args);
-      _initializerDefineProperty(this, "store", _descriptor, this);
+  0; //eaimeta@70e063a35619d71f0,"@ember/routing/route"eaimeta@70e063a35619d71f
+  class ConnectionsRoute extends _route.default {
+    async setupController(controller) {
+      super.setupController(...arguments);
+      await controller.fetchConnections();
     }
-    async model() {
-      return this.store.findAll('connection');
-    }
-  }, _descriptor = _applyDecoratedDescriptor(_class.prototype, "store", [_service.service], {
-    configurable: true,
-    enumerable: true,
-    writable: true,
-    initializer: null
-  }), _class);
+  }
+  _exports.default = ConnectionsRoute;
 });
 ;define("hpotter-ui/routes/credentials", ["exports", "@ember/routing/route", "fetch"], function (_exports, _route, _fetch) {
   "use strict";
@@ -762,10 +881,25 @@
   var _default = _exports.default = (0, _templateFactory.createTemplateFactory)(
   /*
     <div class="connections-page">
-    <h2>Recent Connections</h2>
+    <div class="page-header-with-controls">
+      <h2>Recent Connections</h2>
+      <div class="page-size-control">
+        <label for="pageSize">Show:</label>
+        <select id="pageSize" {{on "change" this.changePageSize}} class="page-size-select" value={{this.pageSize}}>
+          {{#each this.pageSizeOptions as |size|}}
+            <option value={{size}}>{{size}}</option>
+          {{/each}}
+        </select>
+        <span class="per-page-label">per page</span>
+      </div>
+    </div>
   
     <div class="connections-list">
-      {{#if @model}}
+      {{#if this.isLoading}}
+        <div class="loading-indicator">
+          <p>Loading connections...</p>
+        </div>
+      {{else if this.connections}}
         <table class="connections-table">
           <thead>
             <tr>
@@ -780,7 +914,7 @@
             </tr>
           </thead>
           <tbody>
-            {{#each @model as |connection|}}
+            {{#each this.connections as |connection|}}
               <tr>
                 <td>{{connection.id}}</td>
                 <td>{{connection.created_at}}</td>
@@ -804,6 +938,31 @@
             {{/each}}
           </tbody>
         </table>
+  
+        <div class="pagination-controls">
+          <div class="pagination-info">
+            Showing {{this.startRecord}} - {{this.endRecord}} of {{this.totalCount}} connections
+          </div>
+          <div class="pagination-buttons">
+            <button
+              type="button"
+              class="pagination-btn"
+              disabled={{this.disablePreviousPage}}
+              {{on "click" this.previousPage}}
+            >
+              Previous
+            </button>
+            <span class="page-indicator">Page {{this.currentPage}} of {{this.totalPages}}</span>
+            <button
+              type="button"
+              class="pagination-btn"
+              disabled={{this.disableNextPage}}
+              {{on "click" this.nextPage}}
+            >
+              Next
+            </button>
+          </div>
+        </div>
       {{else}}
         <p>No connections found.</p>
       {{/if}}
@@ -812,8 +971,8 @@
   
   */
   {
-    "id": "+QWpBJpz",
-    "block": "[[[10,0],[14,0,\"connections-page\"],[12],[1,\"\\n  \"],[10,\"h2\"],[12],[1,\"Recent Connections\"],[13],[1,\"\\n\\n  \"],[10,0],[14,0,\"connections-list\"],[12],[1,\"\\n\"],[41,[30,1],[[[1,\"      \"],[10,\"table\"],[14,0,\"connections-table\"],[12],[1,\"\\n        \"],[10,\"thead\"],[12],[1,\"\\n          \"],[10,\"tr\"],[12],[1,\"\\n            \"],[10,\"th\"],[12],[1,\"ID\"],[13],[1,\"\\n            \"],[10,\"th\"],[12],[1,\"Time\"],[13],[1,\"\\n            \"],[10,\"th\"],[12],[1,\"Source IP\"],[13],[1,\"\\n            \"],[10,\"th\"],[12],[1,\"Source Port\"],[13],[1,\"\\n            \"],[10,\"th\"],[12],[1,\"Destination\"],[13],[1,\"\\n            \"],[10,\"th\"],[12],[1,\"Container\"],[13],[1,\"\\n            \"],[10,\"th\"],[12],[1,\"Location\"],[13],[1,\"\\n            \"],[10,\"th\"],[12],[1,\"Actions\"],[13],[1,\"\\n          \"],[13],[1,\"\\n        \"],[13],[1,\"\\n        \"],[10,\"tbody\"],[12],[1,\"\\n\"],[42,[28,[37,9],[[28,[37,9],[[30,1]],null]],null],null,[[[1,\"            \"],[10,\"tr\"],[12],[1,\"\\n              \"],[10,\"td\"],[12],[1,[30,2,[\"id\"]]],[13],[1,\"\\n              \"],[10,\"td\"],[12],[1,[30,2,[\"created_at\"]]],[13],[1,\"\\n              \"],[10,\"td\"],[12],[1,[30,2,[\"source_address\"]]],[13],[1,\"\\n              \"],[10,\"td\"],[12],[1,[30,2,[\"source_port\"]]],[13],[1,\"\\n              \"],[10,\"td\"],[12],[1,[30,2,[\"destination_address\"]]],[1,\":\"],[1,[30,2,[\"destination_port\"]]],[13],[1,\"\\n              \"],[10,\"td\"],[12],[1,[30,2,[\"container\"]]],[13],[1,\"\\n              \"],[10,\"td\"],[12],[1,\"\\n\"],[41,[30,2,[\"latitude\"]],[[[1,\"                  \"],[1,[30,2,[\"latitude\"]]],[1,\", \"],[1,[30,2,[\"longitude\"]]],[1,\"\\n\"]],[]],[[[1,\"                  -\\n\"]],[]]],[1,\"              \"],[13],[1,\"\\n              \"],[10,\"td\"],[12],[1,\"\\n                \"],[8,[39,11],[[24,0,\"view-details-btn\"]],[[\"@route\",\"@model\"],[\"connection\",[30,2,[\"id\"]]]],[[\"default\"],[[[[1,\"\\n                  View Details\\n                \"]],[]]]]],[1,\"\\n              \"],[13],[1,\"\\n            \"],[13],[1,\"\\n\"]],[2]],null],[1,\"        \"],[13],[1,\"\\n      \"],[13],[1,\"\\n\"]],[]],[[[1,\"      \"],[10,2],[12],[1,\"No connections found.\"],[13],[1,\"\\n\"]],[]]],[1,\"  \"],[13],[1,\"\\n\"],[13],[1,\"\\n\"]],[\"@model\",\"connection\"],false,[\"div\",\"h2\",\"if\",\"table\",\"thead\",\"tr\",\"th\",\"tbody\",\"each\",\"-track-array\",\"td\",\"link-to\",\"p\"]]",
+    "id": "gBVbzi3m",
+    "block": "[[[10,0],[14,0,\"connections-page\"],[12],[1,\"\\n  \"],[10,0],[14,0,\"page-header-with-controls\"],[12],[1,\"\\n    \"],[10,\"h2\"],[12],[1,\"Recent Connections\"],[13],[1,\"\\n    \"],[10,0],[14,0,\"page-size-control\"],[12],[1,\"\\n      \"],[10,\"label\"],[14,\"for\",\"pageSize\"],[12],[1,\"Show:\"],[13],[1,\"\\n      \"],[11,\"select\"],[24,1,\"pageSize\"],[24,0,\"page-size-select\"],[16,2,[30,0,[\"pageSize\"]]],[4,[38,4],[\"change\",[30,0,[\"changePageSize\"]]],null],[12],[1,\"\\n\"],[42,[28,[37,6],[[28,[37,6],[[30,0,[\"pageSizeOptions\"]]],null]],null],null,[[[1,\"          \"],[10,\"option\"],[15,2,[30,1]],[12],[1,[30,1]],[13],[1,\"\\n\"]],[1]],null],[1,\"      \"],[13],[1,\"\\n      \"],[10,1],[14,0,\"per-page-label\"],[12],[1,\"per page\"],[13],[1,\"\\n    \"],[13],[1,\"\\n  \"],[13],[1,\"\\n\\n  \"],[10,0],[14,0,\"connections-list\"],[12],[1,\"\\n\"],[41,[30,0,[\"isLoading\"]],[[[1,\"      \"],[10,0],[14,0,\"loading-indicator\"],[12],[1,\"\\n        \"],[10,2],[12],[1,\"Loading connections...\"],[13],[1,\"\\n      \"],[13],[1,\"\\n\"]],[]],[[[41,[30,0,[\"connections\"]],[[[1,\"      \"],[10,\"table\"],[14,0,\"connections-table\"],[12],[1,\"\\n        \"],[10,\"thead\"],[12],[1,\"\\n          \"],[10,\"tr\"],[12],[1,\"\\n            \"],[10,\"th\"],[12],[1,\"ID\"],[13],[1,\"\\n            \"],[10,\"th\"],[12],[1,\"Time\"],[13],[1,\"\\n            \"],[10,\"th\"],[12],[1,\"Source IP\"],[13],[1,\"\\n            \"],[10,\"th\"],[12],[1,\"Source Port\"],[13],[1,\"\\n            \"],[10,\"th\"],[12],[1,\"Destination\"],[13],[1,\"\\n            \"],[10,\"th\"],[12],[1,\"Container\"],[13],[1,\"\\n            \"],[10,\"th\"],[12],[1,\"Location\"],[13],[1,\"\\n            \"],[10,\"th\"],[12],[1,\"Actions\"],[13],[1,\"\\n          \"],[13],[1,\"\\n        \"],[13],[1,\"\\n        \"],[10,\"tbody\"],[12],[1,\"\\n\"],[42,[28,[37,6],[[28,[37,6],[[30,0,[\"connections\"]]],null]],null],null,[[[1,\"            \"],[10,\"tr\"],[12],[1,\"\\n              \"],[10,\"td\"],[12],[1,[30,2,[\"id\"]]],[13],[1,\"\\n              \"],[10,\"td\"],[12],[1,[30,2,[\"created_at\"]]],[13],[1,\"\\n              \"],[10,\"td\"],[12],[1,[30,2,[\"source_address\"]]],[13],[1,\"\\n              \"],[10,\"td\"],[12],[1,[30,2,[\"source_port\"]]],[13],[1,\"\\n              \"],[10,\"td\"],[12],[1,[30,2,[\"destination_address\"]]],[1,\":\"],[1,[30,2,[\"destination_port\"]]],[13],[1,\"\\n              \"],[10,\"td\"],[12],[1,[30,2,[\"container\"]]],[13],[1,\"\\n              \"],[10,\"td\"],[12],[1,\"\\n\"],[41,[30,2,[\"latitude\"]],[[[1,\"                  \"],[1,[30,2,[\"latitude\"]]],[1,\", \"],[1,[30,2,[\"longitude\"]]],[1,\"\\n\"]],[]],[[[1,\"                  -\\n\"]],[]]],[1,\"              \"],[13],[1,\"\\n              \"],[10,\"td\"],[12],[1,\"\\n                \"],[8,[39,17],[[24,0,\"view-details-btn\"]],[[\"@route\",\"@model\"],[\"connection\",[30,2,[\"id\"]]]],[[\"default\"],[[[[1,\"\\n                  View Details\\n                \"]],[]]]]],[1,\"\\n              \"],[13],[1,\"\\n            \"],[13],[1,\"\\n\"]],[2]],null],[1,\"        \"],[13],[1,\"\\n      \"],[13],[1,\"\\n\\n      \"],[10,0],[14,0,\"pagination-controls\"],[12],[1,\"\\n        \"],[10,0],[14,0,\"pagination-info\"],[12],[1,\"\\n          Showing \"],[1,[30,0,[\"startRecord\"]]],[1,\" - \"],[1,[30,0,[\"endRecord\"]]],[1,\" of \"],[1,[30,0,[\"totalCount\"]]],[1,\" connections\\n        \"],[13],[1,\"\\n        \"],[10,0],[14,0,\"pagination-buttons\"],[12],[1,\"\\n          \"],[11,\"button\"],[24,0,\"pagination-btn\"],[16,\"disabled\",[30,0,[\"disablePreviousPage\"]]],[24,4,\"button\"],[4,[38,4],[\"click\",[30,0,[\"previousPage\"]]],null],[12],[1,\"\\n            Previous\\n          \"],[13],[1,\"\\n          \"],[10,1],[14,0,\"page-indicator\"],[12],[1,\"Page \"],[1,[30,0,[\"currentPage\"]]],[1,\" of \"],[1,[30,0,[\"totalPages\"]]],[13],[1,\"\\n          \"],[11,\"button\"],[24,0,\"pagination-btn\"],[16,\"disabled\",[30,0,[\"disableNextPage\"]]],[24,4,\"button\"],[4,[38,4],[\"click\",[30,0,[\"nextPage\"]]],null],[12],[1,\"\\n            Next\\n          \"],[13],[1,\"\\n        \"],[13],[1,\"\\n      \"],[13],[1,\"\\n\"]],[]],[[[1,\"      \"],[10,2],[12],[1,\"No connections found.\"],[13],[1,\"\\n    \"]],[]]]],[]]],[1,\"  \"],[13],[1,\"\\n\"],[13],[1,\"\\n\"]],[\"size\",\"connection\"],false,[\"div\",\"h2\",\"label\",\"select\",\"on\",\"each\",\"-track-array\",\"option\",\"span\",\"if\",\"p\",\"table\",\"thead\",\"tr\",\"th\",\"tbody\",\"td\",\"link-to\",\"button\"]]",
     "moduleName": "hpotter-ui/templates/connections.hbs",
     "isStrictMode": false
   });
