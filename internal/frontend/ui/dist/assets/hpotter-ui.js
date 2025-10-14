@@ -383,6 +383,139 @@
     }
   }), _applyDecoratedDescriptor(_class.prototype, "changePageSize", [_object.action], Object.getOwnPropertyDescriptor(_class.prototype, "changePageSize"), _class.prototype), _applyDecoratedDescriptor(_class.prototype, "goToPage", [_object.action], Object.getOwnPropertyDescriptor(_class.prototype, "goToPage"), _class.prototype), _applyDecoratedDescriptor(_class.prototype, "nextPage", [_object.action], Object.getOwnPropertyDescriptor(_class.prototype, "nextPage"), _class.prototype), _applyDecoratedDescriptor(_class.prototype, "previousPage", [_object.action], Object.getOwnPropertyDescriptor(_class.prototype, "previousPage"), _class.prototype), _class);
 });
+;define("hpotter-ui/controllers/credentials", ["exports", "@ember/controller", "@glimmer/tracking", "@ember/object", "fetch"], function (_exports, _controller, _tracking, _object, _fetch) {
+  "use strict";
+
+  Object.defineProperty(_exports, "__esModule", {
+    value: true
+  });
+  _exports.default = void 0;
+  var _class, _descriptor, _descriptor2, _descriptor3, _descriptor4, _descriptor5;
+  0; //eaimeta@70e063a35619d71f0,"@ember/controller",0,"@glimmer/tracking",0,"@ember/object",0,"fetch"eaimeta@70e063a35619d71f
+  function _initializerDefineProperty(e, i, r, l) { r && Object.defineProperty(e, i, { enumerable: r.enumerable, configurable: r.configurable, writable: r.writable, value: r.initializer ? r.initializer.call(l) : void 0 }); }
+  function _defineProperty(e, r, t) { return (r = _toPropertyKey(r)) in e ? Object.defineProperty(e, r, { value: t, enumerable: !0, configurable: !0, writable: !0 }) : e[r] = t, e; }
+  function _toPropertyKey(t) { var i = _toPrimitive(t, "string"); return "symbol" == typeof i ? i : i + ""; }
+  function _toPrimitive(t, r) { if ("object" != typeof t || !t) return t; var e = t[Symbol.toPrimitive]; if (void 0 !== e) { var i = e.call(t, r || "default"); if ("object" != typeof i) return i; throw new TypeError("@@toPrimitive must return a primitive value."); } return ("string" === r ? String : Number)(t); }
+  function _applyDecoratedDescriptor(i, e, r, n, l) { var a = {}; return Object.keys(n).forEach(function (i) { a[i] = n[i]; }), a.enumerable = !!a.enumerable, a.configurable = !!a.configurable, ("value" in a || a.initializer) && (a.writable = !0), a = r.slice().reverse().reduce(function (r, n) { return n(i, e, r) || r; }, a), l && void 0 !== a.initializer && (a.value = a.initializer ? a.initializer.call(l) : void 0, a.initializer = void 0), void 0 === a.initializer ? (Object.defineProperty(i, e, a), null) : a; }
+  function _initializerWarningHelper(r, e) { throw Error("Decorating class property failed. Please ensure that transform-class-properties is enabled and runs after the decorators transform."); }
+  let CredentialsController = _exports.default = (_class = class CredentialsController extends _controller.default {
+    constructor(...args) {
+      super(...args);
+      _initializerDefineProperty(this, "credentials", _descriptor, this);
+      _initializerDefineProperty(this, "currentPage", _descriptor2, this);
+      _initializerDefineProperty(this, "pageSize", _descriptor3, this);
+      _initializerDefineProperty(this, "totalCount", _descriptor4, this);
+      _initializerDefineProperty(this, "isLoading", _descriptor5, this);
+      _defineProperty(this, "pageSizeOptions", [10, 25, 50]);
+    }
+    get totalPages() {
+      return Math.ceil(this.totalCount / this.pageSize);
+    }
+    get offset() {
+      return (this.currentPage - 1) * this.pageSize;
+    }
+    get hasNextPage() {
+      return this.currentPage < this.totalPages;
+    }
+    get hasPreviousPage() {
+      return this.currentPage > 1;
+    }
+    get disableNextPage() {
+      return !this.hasNextPage;
+    }
+    get disablePreviousPage() {
+      return !this.hasPreviousPage;
+    }
+    get startRecord() {
+      return this.offset + 1;
+    }
+    get endRecord() {
+      const end = this.offset + this.pageSize;
+      return end > this.totalCount ? this.totalCount : end;
+    }
+    async fetchCredentials() {
+      this.isLoading = true;
+      try {
+        const response = await (0, _fetch.default)(`/api/credentials?limit=${this.pageSize}&offset=${this.offset}`);
+        if (!response.ok) {
+          throw new Error('Failed to fetch credentials');
+        }
+        const data = await response.json();
+        this.credentials = data || [];
+
+        // Fetch total count
+        const countResponse = await (0, _fetch.default)('/api/credentials');
+        if (countResponse.ok) {
+          const allData = await countResponse.json();
+          this.totalCount = allData.length;
+        }
+      } catch (error) {
+        console.error('Error fetching credentials:', error);
+        this.credentials = [];
+      } finally {
+        this.isLoading = false;
+      }
+    }
+    async changePageSize(event) {
+      this.pageSize = parseInt(event.target.value);
+      this.currentPage = 1;
+      await this.fetchCredentials();
+    }
+    async goToPage(page) {
+      if (page >= 1 && page <= this.totalPages) {
+        this.currentPage = page;
+        await this.fetchCredentials();
+      }
+    }
+    async nextPage() {
+      if (this.hasNextPage) {
+        this.currentPage++;
+        await this.fetchCredentials();
+      }
+    }
+    async previousPage() {
+      if (this.hasPreviousPage) {
+        this.currentPage--;
+        await this.fetchCredentials();
+      }
+    }
+  }, _descriptor = _applyDecoratedDescriptor(_class.prototype, "credentials", [_tracking.tracked], {
+    configurable: true,
+    enumerable: true,
+    writable: true,
+    initializer: function () {
+      return [];
+    }
+  }), _descriptor2 = _applyDecoratedDescriptor(_class.prototype, "currentPage", [_tracking.tracked], {
+    configurable: true,
+    enumerable: true,
+    writable: true,
+    initializer: function () {
+      return 1;
+    }
+  }), _descriptor3 = _applyDecoratedDescriptor(_class.prototype, "pageSize", [_tracking.tracked], {
+    configurable: true,
+    enumerable: true,
+    writable: true,
+    initializer: function () {
+      return 10;
+    }
+  }), _descriptor4 = _applyDecoratedDescriptor(_class.prototype, "totalCount", [_tracking.tracked], {
+    configurable: true,
+    enumerable: true,
+    writable: true,
+    initializer: function () {
+      return 0;
+    }
+  }), _descriptor5 = _applyDecoratedDescriptor(_class.prototype, "isLoading", [_tracking.tracked], {
+    configurable: true,
+    enumerable: true,
+    writable: true,
+    initializer: function () {
+      return false;
+    }
+  }), _applyDecoratedDescriptor(_class.prototype, "changePageSize", [_object.action], Object.getOwnPropertyDescriptor(_class.prototype, "changePageSize"), _class.prototype), _applyDecoratedDescriptor(_class.prototype, "goToPage", [_object.action], Object.getOwnPropertyDescriptor(_class.prototype, "goToPage"), _class.prototype), _applyDecoratedDescriptor(_class.prototype, "nextPage", [_object.action], Object.getOwnPropertyDescriptor(_class.prototype, "nextPage"), _class.prototype), _applyDecoratedDescriptor(_class.prototype, "previousPage", [_object.action], Object.getOwnPropertyDescriptor(_class.prototype, "previousPage"), _class.prototype), _class);
+});
 ;define("hpotter-ui/data-adapter", ["exports", "@ember-data/debug/data-adapter"], function (_exports, _dataAdapter) {
   "use strict";
 
@@ -605,27 +738,18 @@
   }
   _exports.default = ConnectionsRoute;
 });
-;define("hpotter-ui/routes/credentials", ["exports", "@ember/routing/route", "fetch"], function (_exports, _route, _fetch) {
+;define("hpotter-ui/routes/credentials", ["exports", "@ember/routing/route"], function (_exports, _route) {
   "use strict";
 
   Object.defineProperty(_exports, "__esModule", {
     value: true
   });
   _exports.default = void 0;
-  0; //eaimeta@70e063a35619d71f0,"@ember/routing/route",0,"fetch"eaimeta@70e063a35619d71f
+  0; //eaimeta@70e063a35619d71f0,"@ember/routing/route"eaimeta@70e063a35619d71f
   class CredentialsRoute extends _route.default {
-    async model() {
-      try {
-        const response = await (0, _fetch.default)('/api/credentials');
-        if (!response.ok) {
-          throw new Error('Failed to fetch credentials');
-        }
-        const data = await response.json();
-        return data || [];
-      } catch (error) {
-        console.error('Error fetching credentials:', error);
-        return [];
-      }
+    async setupController(controller) {
+      super.setupController(...arguments);
+      await controller.fetchCredentials();
     }
   }
   _exports.default = CredentialsRoute;
@@ -988,19 +1112,25 @@
   var _default = _exports.default = (0, _templateFactory.createTemplateFactory)(
   /*
     <div class="credentials-page">
-    <div class="page-header">
+    <div class="page-header-with-controls">
       <h2>Captured Credentials</h2>
-      <p class="page-info">
-        {{#if @model}}
-          Showing {{@model.length}} captured credential(s)
-        {{else}}
-          No credentials captured yet
-        {{/if}}
-      </p>
+      <div class="page-size-control">
+        <label for="pageSize">Show:</label>
+        <select id="pageSize" {{on "change" this.changePageSize}} class="page-size-select" value={{this.pageSize}}>
+          {{#each this.pageSizeOptions as |size|}}
+            <option value={{size}}>{{size}}</option>
+          {{/each}}
+        </select>
+        <span class="per-page-label">per page</span>
+      </div>
     </div>
   
     <div class="credentials-list">
-      {{#if @model}}
+      {{#if this.isLoading}}
+        <div class="loading-indicator">
+          <p>Loading credentials...</p>
+        </div>
+      {{else if this.credentials}}
         <table class="credentials-table">
           <thead>
             <tr>
@@ -1011,7 +1141,7 @@
             </tr>
           </thead>
           <tbody>
-            {{#each @model as |credential|}}
+            {{#each this.credentials as |credential|}}
               <tr>
                 <td>{{credential.id}}</td>
                 <td>
@@ -1029,6 +1159,31 @@
             {{/each}}
           </tbody>
         </table>
+  
+        <div class="pagination-controls">
+          <div class="pagination-info">
+            Showing {{this.startRecord}} - {{this.endRecord}} of {{this.totalCount}} credentials
+          </div>
+          <div class="pagination-buttons">
+            <button
+              type="button"
+              class="pagination-btn"
+              disabled={{this.disablePreviousPage}}
+              {{on "click" this.previousPage}}
+            >
+              Previous
+            </button>
+            <span class="page-indicator">Page {{this.currentPage}} of {{this.totalPages}}</span>
+            <button
+              type="button"
+              class="pagination-btn"
+              disabled={{this.disableNextPage}}
+              {{on "click" this.nextPage}}
+            >
+              Next
+            </button>
+          </div>
+        </div>
       {{else}}
         <div class="no-data-message">
           <p>No credentials have been captured yet.</p>
@@ -1040,8 +1195,8 @@
   
   */
   {
-    "id": "TxQ3PrBp",
-    "block": "[[[10,0],[14,0,\"credentials-page\"],[12],[1,\"\\n  \"],[10,0],[14,0,\"page-header\"],[12],[1,\"\\n    \"],[10,\"h2\"],[12],[1,\"Captured Credentials\"],[13],[1,\"\\n    \"],[10,2],[14,0,\"page-info\"],[12],[1,\"\\n\"],[41,[30,1],[[[1,\"        Showing \"],[1,[30,1,[\"length\"]]],[1,\" captured credential(s)\\n\"]],[]],[[[1,\"        No credentials captured yet\\n\"]],[]]],[1,\"    \"],[13],[1,\"\\n  \"],[13],[1,\"\\n\\n  \"],[10,0],[14,0,\"credentials-list\"],[12],[1,\"\\n\"],[41,[30,1],[[[1,\"      \"],[10,\"table\"],[14,0,\"credentials-table\"],[12],[1,\"\\n        \"],[10,\"thead\"],[12],[1,\"\\n          \"],[10,\"tr\"],[12],[1,\"\\n            \"],[10,\"th\"],[12],[1,\"ID\"],[13],[1,\"\\n            \"],[10,\"th\"],[12],[1,\"Username\"],[13],[1,\"\\n            \"],[10,\"th\"],[12],[1,\"Password\"],[13],[1,\"\\n            \"],[10,\"th\"],[12],[1,\"Connection ID\"],[13],[1,\"\\n          \"],[13],[1,\"\\n        \"],[13],[1,\"\\n        \"],[10,\"tbody\"],[12],[1,\"\\n\"],[42,[28,[37,10],[[28,[37,10],[[30,1]],null]],null],null,[[[1,\"            \"],[10,\"tr\"],[12],[1,\"\\n              \"],[10,\"td\"],[12],[1,[30,2,[\"id\"]]],[13],[1,\"\\n              \"],[10,\"td\"],[12],[1,\"\\n                \"],[10,1],[14,0,\"username\"],[12],[1,[30,2,[\"username\"]]],[13],[1,\"\\n              \"],[13],[1,\"\\n              \"],[10,\"td\"],[12],[1,\"\\n                \"],[10,1],[14,0,\"password\"],[12],[1,[30,2,[\"password\"]]],[13],[1,\"\\n              \"],[13],[1,\"\\n              \"],[10,\"td\"],[12],[1,\"\\n                \"],[8,[39,13],[[24,0,\"connection-link\"]],[[\"@route\",\"@model\"],[\"connection\",[30,2,[\"connections_id\"]]]],[[\"default\"],[[[[1,\"\\n                  \"],[1,[30,2,[\"connections_id\"]]],[1,\"\\n                \"]],[]]]]],[1,\"\\n              \"],[13],[1,\"\\n            \"],[13],[1,\"\\n\"]],[2]],null],[1,\"        \"],[13],[1,\"\\n      \"],[13],[1,\"\\n\"]],[]],[[[1,\"      \"],[10,0],[14,0,\"no-data-message\"],[12],[1,\"\\n        \"],[10,2],[12],[1,\"No credentials have been captured yet.\"],[13],[1,\"\\n        \"],[10,2],[14,0,\"no-data-hint\"],[12],[1,\"Credentials will appear here when attackers attempt to authenticate with the honeypot.\"],[13],[1,\"\\n      \"],[13],[1,\"\\n\"]],[]]],[1,\"  \"],[13],[1,\"\\n\"],[13],[1,\"\\n\"]],[\"@model\",\"credential\"],false,[\"div\",\"h2\",\"p\",\"if\",\"table\",\"thead\",\"tr\",\"th\",\"tbody\",\"each\",\"-track-array\",\"td\",\"span\",\"link-to\"]]",
+    "id": "b4UP8iHC",
+    "block": "[[[10,0],[14,0,\"credentials-page\"],[12],[1,\"\\n  \"],[10,0],[14,0,\"page-header-with-controls\"],[12],[1,\"\\n    \"],[10,\"h2\"],[12],[1,\"Captured Credentials\"],[13],[1,\"\\n    \"],[10,0],[14,0,\"page-size-control\"],[12],[1,\"\\n      \"],[10,\"label\"],[14,\"for\",\"pageSize\"],[12],[1,\"Show:\"],[13],[1,\"\\n      \"],[11,\"select\"],[24,1,\"pageSize\"],[24,0,\"page-size-select\"],[16,2,[30,0,[\"pageSize\"]]],[4,[38,4],[\"change\",[30,0,[\"changePageSize\"]]],null],[12],[1,\"\\n\"],[42,[28,[37,6],[[28,[37,6],[[30,0,[\"pageSizeOptions\"]]],null]],null],null,[[[1,\"          \"],[10,\"option\"],[15,2,[30,1]],[12],[1,[30,1]],[13],[1,\"\\n\"]],[1]],null],[1,\"      \"],[13],[1,\"\\n      \"],[10,1],[14,0,\"per-page-label\"],[12],[1,\"per page\"],[13],[1,\"\\n    \"],[13],[1,\"\\n  \"],[13],[1,\"\\n\\n  \"],[10,0],[14,0,\"credentials-list\"],[12],[1,\"\\n\"],[41,[30,0,[\"isLoading\"]],[[[1,\"      \"],[10,0],[14,0,\"loading-indicator\"],[12],[1,\"\\n        \"],[10,2],[12],[1,\"Loading credentials...\"],[13],[1,\"\\n      \"],[13],[1,\"\\n\"]],[]],[[[41,[30,0,[\"credentials\"]],[[[1,\"      \"],[10,\"table\"],[14,0,\"credentials-table\"],[12],[1,\"\\n        \"],[10,\"thead\"],[12],[1,\"\\n          \"],[10,\"tr\"],[12],[1,\"\\n            \"],[10,\"th\"],[12],[1,\"ID\"],[13],[1,\"\\n            \"],[10,\"th\"],[12],[1,\"Username\"],[13],[1,\"\\n            \"],[10,\"th\"],[12],[1,\"Password\"],[13],[1,\"\\n            \"],[10,\"th\"],[12],[1,\"Connection ID\"],[13],[1,\"\\n          \"],[13],[1,\"\\n        \"],[13],[1,\"\\n        \"],[10,\"tbody\"],[12],[1,\"\\n\"],[42,[28,[37,6],[[28,[37,6],[[30,0,[\"credentials\"]]],null]],null],null,[[[1,\"            \"],[10,\"tr\"],[12],[1,\"\\n              \"],[10,\"td\"],[12],[1,[30,2,[\"id\"]]],[13],[1,\"\\n              \"],[10,\"td\"],[12],[1,\"\\n                \"],[10,1],[14,0,\"username\"],[12],[1,[30,2,[\"username\"]]],[13],[1,\"\\n              \"],[13],[1,\"\\n              \"],[10,\"td\"],[12],[1,\"\\n                \"],[10,1],[14,0,\"password\"],[12],[1,[30,2,[\"password\"]]],[13],[1,\"\\n              \"],[13],[1,\"\\n              \"],[10,\"td\"],[12],[1,\"\\n                \"],[8,[39,17],[[24,0,\"connection-link\"]],[[\"@route\",\"@model\"],[\"connection\",[30,2,[\"connections_id\"]]]],[[\"default\"],[[[[1,\"\\n                  \"],[1,[30,2,[\"connections_id\"]]],[1,\"\\n                \"]],[]]]]],[1,\"\\n              \"],[13],[1,\"\\n            \"],[13],[1,\"\\n\"]],[2]],null],[1,\"        \"],[13],[1,\"\\n      \"],[13],[1,\"\\n\\n      \"],[10,0],[14,0,\"pagination-controls\"],[12],[1,\"\\n        \"],[10,0],[14,0,\"pagination-info\"],[12],[1,\"\\n          Showing \"],[1,[30,0,[\"startRecord\"]]],[1,\" - \"],[1,[30,0,[\"endRecord\"]]],[1,\" of \"],[1,[30,0,[\"totalCount\"]]],[1,\" credentials\\n        \"],[13],[1,\"\\n        \"],[10,0],[14,0,\"pagination-buttons\"],[12],[1,\"\\n          \"],[11,\"button\"],[24,0,\"pagination-btn\"],[16,\"disabled\",[30,0,[\"disablePreviousPage\"]]],[24,4,\"button\"],[4,[38,4],[\"click\",[30,0,[\"previousPage\"]]],null],[12],[1,\"\\n            Previous\\n          \"],[13],[1,\"\\n          \"],[10,1],[14,0,\"page-indicator\"],[12],[1,\"Page \"],[1,[30,0,[\"currentPage\"]]],[1,\" of \"],[1,[30,0,[\"totalPages\"]]],[13],[1,\"\\n          \"],[11,\"button\"],[24,0,\"pagination-btn\"],[16,\"disabled\",[30,0,[\"disableNextPage\"]]],[24,4,\"button\"],[4,[38,4],[\"click\",[30,0,[\"nextPage\"]]],null],[12],[1,\"\\n            Next\\n          \"],[13],[1,\"\\n        \"],[13],[1,\"\\n      \"],[13],[1,\"\\n\"]],[]],[[[1,\"      \"],[10,0],[14,0,\"no-data-message\"],[12],[1,\"\\n        \"],[10,2],[12],[1,\"No credentials have been captured yet.\"],[13],[1,\"\\n        \"],[10,2],[14,0,\"no-data-hint\"],[12],[1,\"Credentials will appear here when attackers attempt to authenticate with the honeypot.\"],[13],[1,\"\\n      \"],[13],[1,\"\\n    \"]],[]]]],[]]],[1,\"  \"],[13],[1,\"\\n\"],[13],[1,\"\\n\"]],[\"size\",\"credential\"],false,[\"div\",\"h2\",\"label\",\"select\",\"on\",\"each\",\"-track-array\",\"option\",\"span\",\"if\",\"p\",\"table\",\"thead\",\"tr\",\"th\",\"tbody\",\"td\",\"link-to\",\"button\"]]",
     "moduleName": "hpotter-ui/templates/credentials.hbs",
     "isStrictMode": false
   });
