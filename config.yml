@@ -1,0 +1,50 @@
+---
+services:
+  - name: ssh
+    listen_address: "0.0.0.0"
+    listen_port: 22
+    listen_proto: "tcp"
+    image: "cowrie/cowrie:latest"
+    container_port: 2222
+    username_pattern: "\\[b'(.*)'\\/b"
+    password_pattern: "\\/b'(.*)']"
+    payload_pattern: "Command found: (.*)"
+
+  - name: telnet
+    listen_address: "0.0.0.0"
+    listen_port: 23
+    listen_proto: "tcp"
+    image: "cowrie/cowrie:latest"
+    container_port: 2223
+    username_pattern: "\\[b'(.*)'\\/b"
+    password_pattern: "\\/b'(.*)']"
+    payload_pattern: "Command found: (.*)"
+    env:
+      - "COWRIE_TELNET_ENABLED=yes"
+
+  - name: http
+    listen_address: "0.0.0.0"
+    listen_port: 80
+    listen_proto: "tcp"
+    image: "hpotter/http:latest"
+    container_port: 80
+    username_pattern: "[Uu]sername=(.+?)[,&]"
+    password_pattern: "[Pp]assword=(.+?)[,&]"
+    payload_pattern: "Payload=(.+?)$"
+
+  - name: https
+    listen_address: "0.0.0.0"
+    listen_port: 443
+    listen_proto: "tcp"
+    image: "hpotter/http:latest"
+    container_port: 80
+    generate_certs: true
+    username_pattern: "[Uu]sername=(.+?)[,&]"
+    password_pattern: "[Pp]assword=(.+?)[,&]"
+    payload_pattern: "Payload=(.+?)$"
+
+database:
+  image: "postgres:17.6"
+  port: 5432
+  username: "hpotter"
+  password: "lolwut"

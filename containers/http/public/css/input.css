@@ -1,0 +1,78 @@
+@import "tailwindcss";
+@import "tailwindcss/preflight"
+
+@tailwind utilities;
+
+@layer components {
+    * {
+        font-family: 'Inter', system-ui, sans-serif;
+    }
+
+    .btn-primary {
+        @apply px-4 py-2 bg-blue-700 text-white rounded hover:bg-blue-600 transition;
+    }
+
+    .btn-link-primary {
+        @apply block text-center mt-3 text-sm text-blue-500 hover:text-blue-800 hover:underline cursor-pointer
+    }
+
+    .card {
+        @apply shadow-md rounded-lg p-14;
+    }
+
+    .login-background {
+        background-color: theme('colors.blue.950');
+        background-image: url('/static/images/background.svg');
+        background-size: auto;
+        background-repeat: repeat;
+    }
+
+    .top-header {
+        line-height: 40px;
+        border-bottom: 1px solid theme('colors.gray.300');
+        margin: 0px;
+        background-image: linear-gradient(theme('colors.blue.950'), theme('colors.blue.850'));
+        margin-bottom: 1em;
+    }
+
+    .scrollbar-custom {
+        scrollbar-width: thin;
+        scrollbar-color: theme('colors.gray.300') theme('colors.blue.900');
+    }
+
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus,
+    input:-webkit-autofill:active,
+    textarea:-webkit-autofill,
+    textarea:-webkit-autofill:hover,
+    textarea:-webkit-autofill:focus,
+    textarea:-webkit-autofill:active {
+        -webkit-box-shadow: 0 0 0 1000px theme('colors.blue.800') inset !important;
+        -webkit-text-fill-color: white !important;
+        box-shadow: 0 0 0 1000px theme('colors.blue.800') inset !important;
+    }
+}
+
+@theme {
+    --color-gray-300: #2f3540;
+    --color-blue-50:  #f4f8ff;
+    --color-blue-100: #e8f0ff;
+    --color-blue-150: #d7e4ff;
+    --color-blue-200: #c6d8ff;
+    --color-blue-250: #b2c8ff;
+    --color-blue-300: #9db8ff;
+    --color-blue-350: #84a4ff;
+    --color-blue-400: #6a90ff;
+    --color-blue-450: #527cff;
+    --color-blue-500: #3a68ff;
+    --color-blue-550: #2f58f0;
+    --color-blue-600: #2448e0;
+    --color-blue-650: #1e3ec2;
+    --color-blue-700: #1834a3;
+    --color-blue-750: #142c83;
+    --color-blue-800: #071022;
+    --color-blue-850: #060d1b;
+    --color-blue-900: #060a14;
+    --color-blue-950: #05070d;
+}

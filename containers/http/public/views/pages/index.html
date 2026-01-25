@@ -1,0 +1,24 @@
+{{ define "title" }}HPotter Login{{ end }} {{ define "login-content" }}
+<div class="grid grid-cols-2 min-h-screen">
+  <div class="flex items-center justify-center text-white">
+    <img
+      src="/static/images/honeypot.png"
+      class="max-h-[30vh] object-contain"
+    />
+  </div>
+  <div class="flex items-center">
+    <section class="card bg-gray-200 flex flex-col items-center">
+      <div id="login-card" class="inline-flex flex-col items-stretch">
+        <h2
+          class="text-xl font-semibold px-6 mb-4 mt-4 whitespace-nowrap text-center"
+        >
+          Welcome to Diagon Alley
+        </h2>
+        <div id="login-div" class="flex flex-col px-6">
+          {{ template "login-form" . }}
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+{{ end }}

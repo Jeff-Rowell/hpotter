@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  {{ block "login" . }}
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{{ block "title" . }}Diagon Alley{{ end }}</title>
+    <link rel="stylesheet" href="/static/css/output.css" />
+    <link href="/static/images/honeypot.ico" rel="icon" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="/static/js/main.js"></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/htmx.org@2.0.8/dist/htmx.min.js"
+      integrity="sha384-/TgkGk7p307TH7EXJDuUlgG3Ce1UVolAOFopFekQkkXihi5u/6OCvVKyz1W+idaz"
+      crossorigin="anonymous"
+    ></script>
+  </head>
+  <body class="login-background bg-cover">
+    <main class="min-h-screen">{{ block "login-content" . }}{{ end }}</main>
+  </body>
+</html>
+{{ end }}
