@@ -1,6 +1,8 @@
 **/config.json
 **/config.yaml
+**/config.yml
 **/hpotter.db
 **/hpotter
 **/go.work*
 **/node_modules/*
+**/.gitignore

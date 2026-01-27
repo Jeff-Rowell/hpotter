@@ -14,7 +14,7 @@
 </body>
 </html>
 
-HPotter is a honney pot implementation that creates disposible containers upon each connection to the pot. The associated payloads sent to the honeypot are optionally stored to a local database for further inspection and analysis. Request and response data saving can be optionally turned on/off. So if you're only interested in keeping the request data, you can turn off the response data storage option. Additionally, the honey pot is configurable to run multiple services and protocols by specifying the container image to run in a `config.yaml` file as shown below:
+HPotter is a honney pot implementation that creates disposible containers upon each connection to the pot. The associated payloads sent to the honeypot are optionally stored to a local database for further inspection and analysis. Additionally, the honey pot is configurable to run multiple services and protocols by specifying the container image to run in a `config.yaml` file as shown below:
 
 <details>
   <summary>Click to expand example config...</summary>
