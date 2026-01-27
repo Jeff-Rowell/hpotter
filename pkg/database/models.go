@@ -20,6 +20,9 @@ type Connection struct {
 	Longitude       float32       // The longitude of the IP address
 	Country         string        // The country of the IP address
 	Region          string        // The region of the IP address
+	Isp             string        // The ISP of the IP address
+	Organization    string        // The organization of the IP address
+	AsNumber        string        // The AS number of the IP address
 	City            string        // The city of the IP address
 	Zipcode         string        // The zipcode of the IP address
 	Credentials     []Credential  // The credentials sent over the connection

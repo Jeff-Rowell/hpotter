@@ -108,6 +108,9 @@ func (r *Recorder) SaveSession(s, d net.Conn, sd *SessionData, db *database.Data
 		Longitude:       ipInfo.Longitude,
 		Country:         ipInfo.Country,
 		Region:          ipInfo.Region,
+		Isp:             ipInfo.Isp,
+		Organization:    ipInfo.Organization,
+		AsNumber:        ipInfo.AsNumber,
 		City:            ipInfo.City,
 		Zipcode:         ipInfo.Zipcode,
 	}

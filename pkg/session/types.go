@@ -70,6 +70,15 @@ type IpInfo struct {
 	// The city of the IP address
 	City string `json:"city"`
 
+	// The ISP of the IP address
+	Isp string `json:"isp"`
+
+	// The organization of the IP address
+	Organization string `json:"org"`
+
+	// The AS number of the IP address
+	AsNumber string `json:"as"`
+
 	// The zipcode of the IP address
 	Zipcode string `json:"zipcode"`
 }
