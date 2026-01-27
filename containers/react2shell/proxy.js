@@ -32,8 +32,8 @@ export async function proxy(request) {
     process.stdout.write(", Headers=" + JSON.stringify(Object.fromEntries(request.headers)));
     process.stdout.write("\n");
 
-    nextAction = request.headers.get("next-action");
-    rscActionId = request.headers.get("rsc-action-id");
+    const nextAction = request.headers.get("next-action");
+    const rscActionId = request.headers.get("rsc-action-id");
     if (nextAction || rscActionId) {
         return new NextResponse('{"status":"success"}', { status: 200 });
     }
