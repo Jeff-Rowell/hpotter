@@ -22,12 +22,12 @@ services:
     env:
       - "COWRIE_TELNET_ENABLED=yes"
 
-  - name: http
+  - name: react2shell
     listen_address: "0.0.0.0"
     listen_port: 80
     listen_proto: "tcp"
-    image: "hpotter/http:latest"
-    container_port: 80
+    image: "hpotter/react2shell:latest"
+    container_port: 3000
     username_pattern: "[Uu]sername=(.+?)[,&]"
     password_pattern: "[Pp]assword=(.+?)[,&]"
     payload_pattern: "Payload=(.+?)$"
