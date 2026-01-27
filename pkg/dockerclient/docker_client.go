@@ -292,7 +292,7 @@ func (d *Docker) GetContainerIP(id string) (string, error) {
 // shutdown stops and removes the container associated with the given
 // container id, id.
 func (d *Docker) Shutdown(id string) error {
-	slog.Info("shutting down container", "container", id)
+	slog.Debug("shutting down container", "container", id)
 	err := d.ContainerStop(id, false)
 
 	if err != nil {

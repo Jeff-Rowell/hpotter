@@ -34,7 +34,7 @@ func (ct *ContainerThread) Start(job *ContainerJob) {
 		job.ErrChan <- err
 		return
 	}
-	slog.Info("started container", "job", job.Conn, "container", container)
+	slog.Debug("started container", "job", job.Conn, "container", container)
 
 	ct.DockerClient.Messages <- dockerclient.ActorMessage{
 		Type:  dockerclient.Append,

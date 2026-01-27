@@ -56,10 +56,10 @@ type SessionRecorder interface {
 // IpInfo contains the geo-location lookup information for an IP address
 type IpInfo struct {
 	// The latitude of the IP address
-	Latitude float32 `json:"latitude"`
+	Latitude float32 `json:"lat"`
 
 	// The longitude of the IP address
-	Longitude float32 `json:"longitude"`
+	Longitude float32 `json:"lon"`
 
 	// The country of the IP address
 	Country string `json:"country"`

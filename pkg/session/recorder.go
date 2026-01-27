@@ -88,8 +88,9 @@ func (r *Recorder) readLogs(ctx context.Context, cl *client.Client, c string) ([
 }
 
 func (r *Recorder) SaveSession(s, d net.Conn, sd *SessionData, db *database.Database, i string, t time.Time) {
-	sourceIp, sourcePort := r.parseIp(s)
-	destIp, destPort := r.parseIp(d)
+	sourceIp, sourcePort := r.parseIp(s, "remote")
+	destIp, _ := r.parseIp(d, "remote")
+	_, destPort := r.parseIp(s, "local")
 	ipInfo, err := r.getGeoLocationData(sourceIp)
 	if err != nil {
 		slog.Error("failed to get ip info", "error", err)
@@ -140,8 +141,13 @@ func (r *Recorder) SaveSession(s, d net.Conn, sd *SessionData, db *database.Data
 	}
 }
 
-func (r *Recorder) parseIp(c net.Conn) (string, int) {
-	addr := c.RemoteAddr().String()
+func (r *Recorder) parseIp(c net.Conn, side string) (string, int) {
+	var addr string
+	if side == "remote" {
+		addr = c.RemoteAddr().String()
+	} else {
+		addr = c.LocalAddr().String()
+	}
 	slog.Debug("parsing address", "addr", addr)
 
 	var err error

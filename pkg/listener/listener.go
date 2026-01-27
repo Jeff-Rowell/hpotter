@@ -75,7 +75,7 @@ func (l *Listener) listenTCP(svc parser.Service) {
 			} else if err != nil {
 				slog.Error("error creating connection", "error", err)
 			} else {
-				slog.Debug("recieved connection", "conn", conn.RemoteAddr())
+				slog.Info("recieved connection", "local", conn.LocalAddr(), "remote", conn.RemoteAddr())
 
 				if svc.GenerateCerts {
 					tlsConn := tls.Server(conn, tlsConfig)
